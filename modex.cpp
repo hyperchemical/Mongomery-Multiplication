@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <ctime>
 #include <chrono>
+#include <map>
 
 typedef std::chrono::high_resolution_clock Clock;
 typedef std::chrono::milliseconds milliseconds;
@@ -102,14 +103,22 @@ mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b)
 	return m2 + u2*b;
 }
 
-mpz_class montgomery_reduction(mpz_class T, mpz_class r, mpz_class M){
+mpz_class montgomery_reduction(mpz_class T, mpz_class& r, mpz_class& M){
 	mpz_class m, Minv, Mprime, t;
 	mpz_invert(Minv.get_mpz_t(), M.get_mpz_t(), r.get_mpz_t());
-	Mprime = (-1 * (Minv%r));
-	while(Mprime < 0){
-		Mprime = Mprime + r;
+
+	if(m_mprime.find(M) != m_mprime.end()){
+		Mprime = m_mprime[M];
 	}
-	Mprime = Mprime % r;
+	else{
+		Mprime = (-1 * (Minv%r));
+		while(Mprime < 0){
+			Mprime = Mprime + r;
+		}
+		Mprime = Mprime % r;
+		m_mprime[M] = Mprime;
+	}
+	
 	m = (T*Mprime) % r;
 	t = (T+m*M)/r;
 	return t >= M ? t - M : t;
@@ -132,14 +141,14 @@ mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
 	x = (x*r) % n;
 	long length = bit_length(c);
 	for(long i = length-1; i >= 0; i--){
-		z = (z*z) % n;
+		z = montgomery_reduction((z*z),r, n);
 		if(mpz_tstbit(c.get_mpz_t(),i) == 1)
 		{
-			z = (z*x) % n;	
+			z = montgomery_reduction((z*x),r,n);	
 		}
 	}
-	z = (z*rinv)%n;
-	return (z*rinv)%n;
+
+	return montgomery_reduction(z,r,n);
 	//return montgomery_reduction(z, r, n);
 }
 
@@ -154,10 +163,10 @@ int main()
 
 	t0 = Clock::now();
 	mpz_class x, c, n, a, b, result;
-	x = generate_prime(100);
-	c = generate_prime(100);
-	a = generate_prime(30);
-	b = generate_prime(30);
+	x = generate_prime(1000);
+	c = generate_prime(1000);
+	a = generate_prime(300);
+	b = generate_prime(300);
 	n = a*b;
 	t1 = Clock::now();
 	ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
