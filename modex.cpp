@@ -13,6 +13,8 @@ typedef std::chrono::high_resolution_clock Clock;
 typedef std::chrono::milliseconds milliseconds;
 using namespace std;
 
+map<mpz_class, mpz_class> m_mprime;
+
 mpz_class generate_prime(int b){
 	mpz_class prime;
 	while(1){
@@ -76,18 +78,46 @@ mpz_class chinese_remainder_exp(mpz_class x, mpz_class c,
 	return m2 + u2*b;
 }
 
-mpz_class montgomery_reduction(mpz_class T, mpz_class r, mpz_class rinv, mpz_class M){
+mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
+	mpz_class n, r, rinv;
+	n = a*b;
+	r = "2";
+	while(r < n){
+		r = r*2;
+	}
+	mpz_invert(rinv.get_mpz_t(), r.get_mpz_t(), n.get_mpz_t());
+
+	mpz_class dp, dq, t, m1, m2, u1, u2;
+	dp = c % (a-1);
+	dq = c % (b-1);
+	mpz_invert(t.get_mpz_t(), b.get_mpz_t(), a.get_mpz_t());
+	mpz_powm(m1.get_mpz_t(), x.get_mpz_t(), dp.get_mpz_t(), a.get_mpz_t());
+	mpz_powm(m2.get_mpz_t(), x.get_mpz_t(), dq.get_mpz_t(), b.get_mpz_t());
+	u1 = (m1-m2);
+	while(u1 < 0){
+		u1 += a;
+	}
+	u1 = u1 % a;
+	u2 = (u1*t) % a;
+	return m2 + u2*b;
+}
+
+mpz_class montgomery_reduction(mpz_class T, mpz_class r, mpz_class M){
 	mpz_class m, Minv, Mprime, t;
 	mpz_invert(Minv.get_mpz_t(), M.get_mpz_t(), r.get_mpz_t());
-	Mprime = (-1 * Minv) % r;
-	m = T*Mprime;
+	Mprime = (-1 * (Minv%r));
+	while(Mprime < 0){
+		Mprime = Mprime + r;
+	}
+	Mprime = Mprime % r;
+	m = (T*Mprime) % r;
 	t = (T+m*M)/r;
 	return t >= M ? t - M : t;
 }
 
 
 mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
-	mpz_class ares, bres, n, r, rinv;
+	mpz_class n, r, rinv;
 	n = a*b;
 
 	r = "2";
@@ -95,7 +125,6 @@ mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
 		r = r*2;
 	}
 	mpz_invert(rinv.get_mpz_t(), r.get_mpz_t(), n.get_mpz_t());
-
 
 	mpz_class z;
 	z = "1";
@@ -109,9 +138,11 @@ mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
 			z = (z*x) % n;	
 		}
 	}
-
-	return montgomery_reduction(z, r, rinv, n);
+	z = (z*rinv)%n;
+	return (z*rinv)%n;
+	//return montgomery_reduction(z, r, n);
 }
+
 
 int main()
 {
@@ -157,5 +188,9 @@ int main()
 	ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
 	cout << "Time: " << ms.count() << "ms\n";
 
-
+	// t0 = Clock::now();
+	// cout << "CRT w/ Montgomery: " <<  montgomery_crt_exp(x,c,a,b) << endl;
+	// t1 = Clock::now();
+	// ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
+	// cout << "Time: " << ms.count() << "ms\n";
 }
