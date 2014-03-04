@@ -14,7 +14,10 @@ typedef std::chrono::high_resolution_clock Clock;
 typedef std::chrono::milliseconds milliseconds;
 using namespace std;
 
-map<mpz_class, mpz_class> m_mprime;
+int count = 0;
+int count2 = 0;
+map<mpz_class, mpz_class> t_m_cache;
+mpz_class Mprime;
 
 mpz_class generate_prime(int b){
 	mpz_class prime;
@@ -104,22 +107,28 @@ mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b)
 }
 
 mpz_class montgomery_reduction(mpz_class T, mpz_class& r, mpz_class& M){
-	mpz_class m, Minv, Mprime, t;
+	mpz_class m, Minv, t;
 	mpz_invert(Minv.get_mpz_t(), M.get_mpz_t(), r.get_mpz_t());
 
-	if(m_mprime.find(M) != m_mprime.end()){
-		Mprime = m_mprime[M];
-	}
-	else{
+	count2++;
+	if(Mprime == -1){
 		Mprime = (-1 * (Minv%r));
 		while(Mprime < 0){
 			Mprime = Mprime + r;
 		}
 		Mprime = Mprime % r;
-		m_mprime[M] = Mprime;
+	}
+
+	T = T%r;
+	if(t_m_cache.find(T) == t_m_cache.end()){
+		m = (T*Mprime) % r;
+		t_m_cache[T] = m;
+	}
+	else {
+		m = t_m_cache[T];
+		count++;
 	}
 	
-	m = (T*Mprime) % r;
 	t = (T+m*M)/r;
 	return t >= M ? t - M : t;
 }
@@ -155,6 +164,7 @@ mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
 
 int main()
 {
+	Mprime = "-1";
 	srand(time(NULL));
 
 	Clock::time_point t0 = Clock::now();
@@ -197,6 +207,9 @@ int main()
 	ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
 	cout << "Time: " << ms.count() << "ms\n";
 
+	cout << count << endl;
+	cout << count2 << endl;
+	cout << (0.0+count)/count2 << endl;
 	// t0 = Clock::now();
 	// cout << "CRT w/ Montgomery: " <<  montgomery_crt_exp(x,c,a,b) << endl;
 	// t1 = Clock::now();
