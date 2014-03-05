@@ -201,13 +201,15 @@ mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b)
 	return m2 + u2*b;
 }
 
-mpz_class montgomery_reduction(mpz_class T, mpz_class& r, mpz_class& M){
+mpz_class montgomery_reduction(mpz_class T, long exponent, mpz_class& M, mpz_class & r){
 	mpz_class m, Minv, Mprime, t;
 
 	if(m_cache.find(M) == m_cache.end()){
 		mpz_invert(Minv.get_mpz_t(), M.get_mpz_t(), r.get_mpz_t());
 		Mprime = (-1 * (Minv));
-		mpz_mod(Mprime.get_mpz_t(), Mprime.get_mpz_t(), r.get_mpz_t());
+		//Right shifts instead of mod
+		mpz_fdiv_r_2exp(Mprime.get_mpz_t(), Mprime.get_mpz_t(), exponent);
+		//mpz_mod(Mprime.get_mpz_t(), Mprime.get_mpz_t(), r.get_mpz_t());
 		m_cache[M] = {Minv, Mprime};
 	}
 	else{
@@ -218,7 +220,9 @@ mpz_class montgomery_reduction(mpz_class T, mpz_class& r, mpz_class& M){
 	//Not cached
 	if(t_m_cache.find({M,T}) == t_m_cache.end()){
 		m = (T*Mprime);
-		mpz_mod(m.get_mpz_t(), m.get_mpz_t(), r.get_mpz_t());
+		//Right shifts instead of mod
+		mpz_fdiv_r_2exp (m.get_mpz_t(), m.get_mpz_t(), exponent);
+		//mpz_mod(m.get_mpz_t(), m.get_mpz_t(), r.get_mpz_t());
 		t_m_cache[{M,T}] = m;
 	}
 	else { //Cached
@@ -234,7 +238,8 @@ mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
 	mpz_class n, r, rinv;
 	n = a*b;
 	r = "2";
-	while(r < n){
+	long exponent = 1;
+	for(;r < n; exponent++){
 		r = r*2;
 	}
 	mpz_invert(rinv.get_mpz_t(), r.get_mpz_t(), n.get_mpz_t());
@@ -245,14 +250,14 @@ mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
 	x = (x*r) % n; 
 	long length = bit_length(c);
 	for(long i = length-1; i >= 0; i--){
-		z = montgomery_reduction((z*z),r, n);;
+		z = montgomery_reduction((z*z),exponent, n, r);;
 		if(mpz_tstbit(c.get_mpz_t(),i) == 1)
 		{
-			z = montgomery_reduction((z*x),r,n);	
+			z = montgomery_reduction((z*x),exponent,n, r);	
 		}
 	}
 
-	return montgomery_reduction(z,r,n);
+	return montgomery_reduction(z,exponent,n, r);
 }
 
 void assert_all_equal(vector<mpz_class>& vec)
