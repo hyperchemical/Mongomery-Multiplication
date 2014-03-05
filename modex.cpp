@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 
 	//t0 = Clock::now();
 	mpz_class x, c, n, a, b, result;
-	vector<long> base_sizes = {1000000, 2000000};
+	vector<long> base_sizes = {100000, 200000};
 	vector<long> prime_sizes = {500, 1000};
 	int line_width = 15;
 	cout << left;
@@ -282,6 +282,7 @@ void assert_all_equal(vector<mpz_class>& vec)
 		{
 			if(vec[i]!=vec[j])
 			{
+				cout << "Array Index: " << j << endl;
 				throw runtime_error("ERROR: Assert Equal Failed");
 			}
 		}
