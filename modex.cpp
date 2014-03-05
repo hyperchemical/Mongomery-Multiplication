@@ -50,13 +50,20 @@ mpz_class montgomery_reduction(mpz_class T, long exponent, mpz_class& r, mpz_cla
 mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b);
 void assert_all_equal(vector<mpz_class>& vec);
 
-int main()
+int main(int argc, char *argv[])
 {
 	//Types of exponentiation
 	vector<string> function_names = {"S&M", "S&M w/ Mont","CRT", "CRT w/ Mont"};
+	vector<bool> active(function_names.size(), true);
 	vector<mpz_class (*)(mpz_class, mpz_class, mpz_class, mpz_class)> functions
 		= {square_and_multiply_exp, montgomery_exp, chinese_remainder_exp,
 			montgomery_crt_exp};
+
+	for(int i = 1; i < argc; i++){
+		if(!atoi(argv[i])){
+			active[i-1] = false;
+		}
+	}
 
 	gmp_randstate_t rand_state;
 	gmp_randinit_default(rand_state);
@@ -105,6 +112,7 @@ int main()
 			cout << setw(line_width) << "mpz_powm" << "|" << ms.count() << "ms\n";
 
 			for(int i = 0; i < functions.size(); i++){
+				if(!active[i]) continue;
 				t0 = Clock::now(); //timing
 				values.push_back(functions[i](x,c,a,b));
 				//cout << function_names[i] << " " << values.back() << endl;
