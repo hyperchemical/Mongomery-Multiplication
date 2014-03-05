@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 
 	//t0 = Clock::now();
 	mpz_class x, c, n, a, b, result;
-	vector<long> base_sizes = {100000, 200000};
+	vector<long> base_sizes = {1000000, 2000000};
 	vector<long> prime_sizes = {500, 1000};
 	int line_width = 15;
 	cout << left;
@@ -99,8 +99,8 @@ int main(int argc, char *argv[])
 			cout << setw(line_width) << "Info" << "|Results\n";
 			cout << setfill('-') << setw(line_width) << "-" <<  "|" << setw(line_width) << "-" << endl;
 			cout << setfill(' ');
-			cout << setw(line_width) << "Base size" << "|" << num_size << endl;
-			cout << setw(line_width) << "Prime size" << "|" << prime_size << endl;
+			cout << setw(line_width) << "Base size" << "|" << num_size << " bits" << endl;
+			cout << setw(line_width) << "Prime size" << "|" << prime_size << " bits" << endl;
 			cout << setw(line_width) << "Generate Prime" << "|" << ms.count() << "ms\n";
 
 			//Generate correct answer
