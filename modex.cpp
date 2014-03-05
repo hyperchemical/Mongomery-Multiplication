@@ -88,9 +88,12 @@ int main()
 			t1 = Clock::now();
 			ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
 
-			cout << setw(line_width) << "Base size" << num_size << endl;
-			cout << setw(line_width) << "Prime size" << prime_size << endl;
-			cout << setw(line_width) << "Generate Prime" <<  ms.count() << "ms\n";
+			cout << setw(line_width) << "Info" << "|Results\n";
+			cout << setfill('-') << setw(line_width) << "-" <<  "|" << setw(line_width) << "-" << endl;
+			cout << setfill(' ');
+			cout << setw(line_width) << "Base size" << "|" << num_size << endl;
+			cout << setw(line_width) << "Prime size" << "|" << prime_size << endl;
+			cout << setw(line_width) << "Generate Prime" << "|" << ms.count() << "ms\n";
 
 			//Generate correct answer
 			t0 = Clock::now();
@@ -99,7 +102,7 @@ int main()
 			//cout << "mpz_powm: " << result << endl;
 			t1 = Clock::now();
 			ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
-			cout << setw(line_width) << "mpz_powm" << ms.count() << "ms\n";
+			cout << setw(line_width) << "mpz_powm" << "|" << ms.count() << "ms\n";
 
 			for(int i = 0; i < functions.size(); i++){
 				t0 = Clock::now(); //timing
@@ -107,11 +110,12 @@ int main()
 				//cout << function_names[i] << " " << values.back() << endl;
 				t1 = Clock::now(); //timing
 				ms = std::chrono::duration_cast<milliseconds>(t1 - t0); //timing
-				cout << setw(line_width) << function_names[i] << ms.count() << "ms\n";
+				cout << setw(line_width) << function_names[i] << "|" << ms.count() << "ms\n";
 			}
 
+			//Verification of correctness
 			assert_all_equal(values);
-			cout << "=====" << endl;
+			cout << endl;
 		}
 	}
 }
@@ -221,7 +225,7 @@ mpz_class montgomery_reduction(mpz_class T, long exponent, mpz_class& M, mpz_cla
 	if(t_m_cache.find({M,T}) == t_m_cache.end()){
 		m = (T*Mprime);
 		//Right shifts instead of mod
-		mpz_fdiv_r_2exp (m.get_mpz_t(), m.get_mpz_t(), exponent);
+		mpz_fdiv_r_2exp(m.get_mpz_t(), m.get_mpz_t(), exponent);
 		//mpz_mod(m.get_mpz_t(), m.get_mpz_t(), r.get_mpz_t());
 		t_m_cache[{M,T}] = m;
 	}
