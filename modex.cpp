@@ -25,6 +25,7 @@ Fri Dec 13 06:58:20 EST 2013 x86_64 x86_64 x86_64 GNU/Linux
 #include <vector>
 #include <stdexcept> 
 #include <cassert>
+#include <iomanip>
 
 typedef std::chrono::high_resolution_clock Clock;
 typedef std::chrono::milliseconds milliseconds;
@@ -52,9 +53,10 @@ void assert_all_equal(vector<mpz_class>& vec);
 
 int main()
 {
-	vector<string> function_names = {"S&M", "CRT", "S&M w/ Mont", "CRT w/ Mont"};
+	//Types of exponentiation
+	vector<string> function_names = {"S&M", "S&M w/ Mont","CRT", "CRT w/ Mont"};
 	vector<mpz_class (*)(mpz_class, mpz_class, mpz_class, mpz_class)> functions
-		= {square_and_multiply_exp, chinese_remainder_exp, montgomery_exp, 
+		= {square_and_multiply_exp, montgomery_exp, chinese_remainder_exp,
 			montgomery_crt_exp};
 
 	gmp_randstate_t rand_state;
@@ -65,46 +67,53 @@ int main()
 	Clock::time_point t1;
 	milliseconds ms;
 
-	t0 = Clock::now();
+	//t0 = Clock::now();
 	mpz_class x, c, n, a, b, result;
-	//Pairs of <Base Size, Prime Size> in power 2
-	vector<pair<long,long>> sizes = {
-		{100000, 300}, {100000, 500}, {100000, 1000},
-		{300000, 300}, {100000, 500}, {100000, 1000}};
-	for(int i = 0; i < sizes.size(); i++){
-		vector<mpz_class> values;
-		long num_size = sizes[i].first;
-		long prime_size = sizes[i].second;
-		mpz_urandomb(x.get_mpz_t(), rand_state, num_size);
-		mpz_urandomb(c.get_mpz_t(), rand_state, num_size);
-		a = generate_prime(prime_size);
-		b = generate_prime(prime_size);
-		n = a*b;
-		t1 = Clock::now();
-		ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
-		cout << "Base size: " << num_size << endl;
-		cout << "Prime size: " << prime_size << endl;
-		cout << "Generate Prime: " <<  ms.count() << "ms\n";
+	vector<long> base_sizes = {100000, 200000};
+	vector<long> prime_sizes = {500, 1000};
+	int line_width = 15;
+	cout << left;
 
-		t0 = Clock::now();
-		mpz_powm(result.get_mpz_t(), x.get_mpz_t(), c.get_mpz_t(), n.get_mpz_t());
-		values.push_back(result);
-		//cout << "mpz_powm: " << result << endl;
-		t1 = Clock::now();
-		ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
-		cout << "mpz_powm: " << ms.count() << "ms\n";
+	//Run algorithms for all pairs of sizes
+	for(int i = 0; i < base_sizes.size(); i++){
+		for(int j = 0; j < prime_sizes.size(); j++){
+			vector<mpz_class> values;
+			long num_size = base_sizes[i];
+			long prime_size = prime_sizes[j];
+			//Generate random x, c, a, b
+			mpz_urandomb(x.get_mpz_t(), rand_state, num_size);
+			mpz_urandomb(c.get_mpz_t(), rand_state, num_size);
+			a = generate_prime(prime_size);
+			b = generate_prime(prime_size);
+			n = a*b;
+			t1 = Clock::now();
+			ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
 
-		for(int i = 0; i < functions.size(); i++){
-			t0 = Clock::now(); //timing
-			values.push_back(functions[i](x,c,a,b));
-			//cout << function_names[i] << " " << values.back() << endl;
-			t1 = Clock::now(); //timing
-			ms = std::chrono::duration_cast<milliseconds>(t1 - t0); //timing
-			cout << function_names[i] << ": " << ms.count() << "ms\n";
+			cout << setw(line_width) << "Base size" << num_size << endl;
+			cout << setw(line_width) << "Prime size" << prime_size << endl;
+			cout << setw(line_width) << "Generate Prime" <<  ms.count() << "ms\n";
+
+			//Generate correct answer
+			t0 = Clock::now();
+			mpz_powm(result.get_mpz_t(), x.get_mpz_t(), c.get_mpz_t(), n.get_mpz_t());
+			values.push_back(result);
+			//cout << "mpz_powm: " << result << endl;
+			t1 = Clock::now();
+			ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
+			cout << setw(line_width) << "mpz_powm" << ms.count() << "ms\n";
+
+			for(int i = 0; i < functions.size(); i++){
+				t0 = Clock::now(); //timing
+				values.push_back(functions[i](x,c,a,b));
+				//cout << function_names[i] << " " << values.back() << endl;
+				t1 = Clock::now(); //timing
+				ms = std::chrono::duration_cast<milliseconds>(t1 - t0); //timing
+				cout << setw(line_width) << function_names[i] << ms.count() << "ms\n";
+			}
+
+			assert_all_equal(values);
+			cout << "=====" << endl;
 		}
-
-		assert_all_equal(values);
-		cout << "=====" << endl;
 	}
 }
 
