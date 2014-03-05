@@ -29,6 +29,8 @@ Fri Dec 13 06:58:20 EST 2013 x86_64 x86_64 x86_64 GNU/Linux
 typedef std::chrono::high_resolution_clock Clock;
 typedef std::chrono::milliseconds milliseconds;
 
+//TODO: Implement CRT w/ Montgomery (Currently is just CRT)
+
 using namespace std;
 
 //Global caches for montgomery reductions
