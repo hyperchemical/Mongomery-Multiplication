@@ -202,10 +202,8 @@ mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b)
 
 	u1 = (m1-m2)*r;
 	t = (t*r) % a;
- 	//u1 = montgomery_reduction((m1-m2), exponent, a, r);
 	u2 = montgomery_reduction((u1*t), exponent, a, r);
 	u2 = montgomery_reduction(u2, exponent, a, r);
-	//mpz_mod(u2.get_mpz_t(), u2.get_mpz_t(), a.get_mpz_t());
 	return m2 + u2*b;
 }
 
