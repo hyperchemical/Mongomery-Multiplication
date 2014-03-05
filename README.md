@@ -7,13 +7,13 @@ milewa@umich.edu
 
 Command Line Arguments
 -------------
-Takes optional command line arguments
+Takes optional command line arguments. By default, runs all algorithms.
 
-By default, runs all algorithms.
+A value of 0 zero disables the given algorithm. Partial inputs are accepted. 
 
-A value of 0 zero disables the given algorithm.
+For example the following disables montgomery reduction algorithms:
+> ./modex 1 0 1 0
 
-> ./modex 0 0 0 0
 
 * Arg0 [1/0]: Run S&M
 * Arg1 [1/0]: Run S&M w/ Montgomery Reductions
