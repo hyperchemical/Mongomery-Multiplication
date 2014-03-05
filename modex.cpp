@@ -10,8 +10,7 @@ Linux caen-vnc14.engin.umich.edu 2.6.32-431.3.1.el6.x86_64 #1 SMP
 Fri Dec 13 06:58:20 EST 2013 x86_64 x86_64 x86_64 GNU/Linux
 */
 
-#include <string>
-#include <sys/time.h>  
+#include <string> 
 #include <stdlib.h>
 #include <gmp.h>
 #include <iostream>
