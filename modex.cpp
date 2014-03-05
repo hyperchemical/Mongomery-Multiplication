@@ -29,7 +29,7 @@ Fri Dec 13 06:58:20 EST 2013 x86_64 x86_64 x86_64 GNU/Linux
 typedef std::chrono::high_resolution_clock Clock;
 typedef std::chrono::milliseconds milliseconds;
 
-//TODO: Implement CRT w/ Montgomery (Currently is just CRT)
+//TODO: Check CRT w/ Montgomery
 
 using namespace std;
 
@@ -46,7 +46,7 @@ mpz_class square_and_multiply_exp(mpz_class x, mpz_class c,
 mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b);
 mpz_class chinese_remainder_exp(mpz_class x, mpz_class c,
 	mpz_class a, mpz_class b);
-mpz_class montgomery_reduction(mpz_class T, mpz_class& r, mpz_class& M);
+mpz_class montgomery_reduction(mpz_class T, long exponent, mpz_class& r, mpz_class& M);
 mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b);
 void assert_all_equal(vector<mpz_class>& vec);
 
@@ -187,7 +187,8 @@ mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b)
 	mpz_class n, r, rinv;
 	n = a*b;
 	r = "2";
-	while(r < n){
+	long exponent = 1;
+	for(;r < a; exponent++){
 		r = r*2;
 	}
 	mpz_invert(rinv.get_mpz_t(), r.get_mpz_t(), n.get_mpz_t());
@@ -198,10 +199,13 @@ mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b)
 	mpz_invert(t.get_mpz_t(), b.get_mpz_t(), a.get_mpz_t());
 	mpz_powm(m1.get_mpz_t(), x.get_mpz_t(), dp.get_mpz_t(), a.get_mpz_t());
 	mpz_powm(m2.get_mpz_t(), x.get_mpz_t(), dq.get_mpz_t(), b.get_mpz_t());
-	u1 = (m1-m2);
-	mpz_mod(u1.get_mpz_t(), u1.get_mpz_t(), a.get_mpz_t());
-	u2 = (u1*t);
-	mpz_mod(u2.get_mpz_t(), u2.get_mpz_t(), a.get_mpz_t());
+
+	u1 = (m1-m2)*r;
+	t = (t*r) % a;
+ 	//u1 = montgomery_reduction((m1-m2), exponent, a, r);
+	u2 = montgomery_reduction((u1*t), exponent, a, r);
+	u2 = montgomery_reduction(u2, exponent, a, r);
+	//mpz_mod(u2.get_mpz_t(), u2.get_mpz_t(), a.get_mpz_t());
 	return m2 + u2*b;
 }
 
@@ -276,4 +280,3 @@ void assert_all_equal(vector<mpz_class>& vec)
 		}
 	}
 }
-
