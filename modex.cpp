@@ -65,6 +65,7 @@ int main()
 
 	t0 = Clock::now();
 	mpz_class x, c, n, a, b, result;
+	//Pairs of <Base Size, Prime Size> in power 2
 	vector<pair<long,long>> sizes = {
 		{100000, 300}, {100000, 500}, {100000, 1000},
 		{300000, 300}, {100000, 500}, {100000, 1000}};
@@ -130,7 +131,6 @@ long bit_length(mpz_class x){
 			num_bits = i+1;
 		}
 	}
-	//cout << x << " num_bits: " << num_bits << endl;
 	return num_bits;
 }
 
@@ -235,17 +235,14 @@ mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
 	x = (x*r) % n; 
 	long length = bit_length(c);
 	for(long i = length-1; i >= 0; i--){
-		z = montgomery_reduction((z*z),r, n);
-		//z = ((z*z)*rinv)%n;
+		z = montgomery_reduction((z*z),r, n);;
 		if(mpz_tstbit(c.get_mpz_t(),i) == 1)
 		{
 			z = montgomery_reduction((z*x),r,n);	
-			//z = ((z*x)*rinv)%n;
 		}
 	}
 
 	return montgomery_reduction(z,r,n);
-	//return (z*rinv)%n;
 }
 
 void assert_all_equal(vector<mpz_class>& vec)
@@ -259,6 +256,5 @@ void assert_all_equal(vector<mpz_class>& vec)
 			}
 		}
 	}
-	//cout << "Check complete, all numbers match\n";
 }
 
