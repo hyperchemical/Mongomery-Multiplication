@@ -59,6 +59,7 @@ int main(int argc, char *argv[])
 		= {square_and_multiply_exp, montgomery_exp, chinese_remainder_exp,
 			montgomery_crt_exp};
 
+	//Deactivate algorithms as needed
 	for(int i = 1; i < argc; i++){
 		if(!atoi(argv[i])){
 			active[i-1] = false;

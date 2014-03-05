@@ -5,6 +5,21 @@ heyoh@umich.edu
 hning@umich.edu
 milewa@umich.edu
 
+Command Line Arguments
+-------------
+Takes optional command line arguments
+
+By default, runs all algorithms.
+
+A value of 0 zero disables the given algorithm.
+
+> ./modex 0 0 0 0
+
+* Arg0 [1/0]: Run S&M
+* Arg1 [1/0]: Run S&M w/ Montgomery Reductions
+* Arg2 [1/0]: Run CRT 
+* Arg3 [1/0]: Run CRT w/ Montgomery Reductions
+ 
 Sample Output
 -------------
 
