@@ -28,12 +28,82 @@ Fri Dec 13 06:58:20 EST 2013 x86_64 x86_64 x86_64 GNU/Linux
 
 typedef std::chrono::high_resolution_clock Clock;
 typedef std::chrono::milliseconds milliseconds;
+
 using namespace std;
 
+//Global caches for montgomery reductions
+//Takes in M and T, returns m'
 map<pair<mpz_class,mpz_class>, mpz_class> t_m_cache;
+//Takes in M, returns Minv and M' [SIGNIFICANT SPEEDUP]
 map<mpz_class, pair<mpz_class, mpz_class>> m_cache;
-// mpz_class Minv;
-// mpz_class Mprime;
+
+//Generates a b bit prime number
+mpz_class generate_prime(int b);
+mpz_class square_and_multiply_exp(mpz_class x, mpz_class c, 
+	mpz_class a, mpz_class b);
+mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b);
+mpz_class chinese_remainder_exp(mpz_class x, mpz_class c,
+	mpz_class a, mpz_class b);
+mpz_class montgomery_reduction(mpz_class T, mpz_class& r, mpz_class& M);
+mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b);
+void assert_all_equal(vector<mpz_class>& vec);
+
+int main()
+{
+	vector<string> function_names = {"S&M", "CRT", "S&M w/ Mont", "CRT w/ Mont"};
+	vector<mpz_class (*)(mpz_class, mpz_class, mpz_class, mpz_class)> functions
+		= {square_and_multiply_exp, chinese_remainder_exp, montgomery_exp, 
+			montgomery_crt_exp};
+
+	gmp_randstate_t rand_state;
+	gmp_randinit_default(rand_state);
+	srand(time(NULL));
+
+	Clock::time_point t0 = Clock::now();
+	Clock::time_point t1;
+	milliseconds ms;
+
+	t0 = Clock::now();
+	mpz_class x, c, n, a, b, result;
+	vector<pair<long,long>> sizes = {
+		{100000, 300}, {100000, 500}, {100000, 1000},
+		{300000, 300}, {100000, 500}, {100000, 1000}};
+	for(int i = 0; i < sizes.size(); i++){
+		vector<mpz_class> values;
+		long num_size = sizes[i].first;
+		long prime_size = sizes[i].second;
+		mpz_urandomb(x.get_mpz_t(), rand_state, num_size);
+		mpz_urandomb(c.get_mpz_t(), rand_state, num_size);
+		a = generate_prime(prime_size);
+		b = generate_prime(prime_size);
+		n = a*b;
+		t1 = Clock::now();
+		ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
+		cout << "Base size: " << num_size << endl;
+		cout << "Prime size: " << prime_size << endl;
+		cout << "Generate Prime: " <<  ms.count() << "ms\n";
+
+		t0 = Clock::now();
+		mpz_powm(result.get_mpz_t(), x.get_mpz_t(), c.get_mpz_t(), n.get_mpz_t());
+		values.push_back(result);
+		//cout << "mpz_powm: " << result << endl;
+		t1 = Clock::now();
+		ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
+		cout << "mpz_powm: " << ms.count() << "ms\n";
+
+		for(int i = 0; i < functions.size(); i++){
+			t0 = Clock::now(); //timing
+			values.push_back(functions[i](x,c,a,b));
+			//cout << function_names[i] << " " << values.back() << endl;
+			t1 = Clock::now(); //timing
+			ms = std::chrono::duration_cast<milliseconds>(t1 - t0); //timing
+			cout << function_names[i] << ": " << ms.count() << "ms\n";
+		}
+
+		assert_all_equal(values);
+		cout << "=====" << endl;
+	}
+}
 
 mpz_class generate_prime(int b){
 	mpz_class prime;
@@ -192,59 +262,3 @@ void assert_all_equal(vector<mpz_class>& vec)
 	//cout << "Check complete, all numbers match\n";
 }
 
-int main()
-{
-	vector<string> function_names = {"S&M", "CRT", "S&M w/ Mont", "CRT w/ Mont"};
-	vector<mpz_class (*)(mpz_class, mpz_class, mpz_class, mpz_class)> functions
-		= {square_and_multiply_exp, chinese_remainder_exp, montgomery_exp, 
-			montgomery_crt_exp};
-
-	gmp_randstate_t rand_state;
-	gmp_randinit_default(rand_state);
-	srand(time(NULL));
-
-	Clock::time_point t0 = Clock::now();
-	Clock::time_point t1;
-	milliseconds ms;
-
-	t0 = Clock::now();
-	mpz_class x, c, n, a, b, result;
-	vector<pair<long,long>> sizes = {
-		{100000, 300}, {100000, 500}, {100000, 1000},
-		{300000, 300}, {100000, 500}, {100000, 1000}};
-	for(int i = 0; i < sizes.size(); i++){
-		vector<mpz_class> values;
-		long num_size = sizes[i].first;
-		long prime_size = sizes[i].second;
-		mpz_urandomb(x.get_mpz_t(), rand_state, num_size);
-		mpz_urandomb(c.get_mpz_t(), rand_state, num_size);
-		a = generate_prime(prime_size);
-		b = generate_prime(prime_size);
-		n = a*b;
-		t1 = Clock::now();
-		ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
-		cout << "Base size: " << num_size << endl;
-		cout << "Prime size: " << prime_size << endl;
-		cout << "Generate Prime: " <<  ms.count() << "ms\n";
-
-		t0 = Clock::now();
-		mpz_powm(result.get_mpz_t(), x.get_mpz_t(), c.get_mpz_t(), n.get_mpz_t());
-		values.push_back(result);
-		//cout << "mpz_powm: " << result << endl;
-		t1 = Clock::now();
-		ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
-		cout << "mpz_powm: " << ms.count() << "ms\n";
-
-		for(int i = 0; i < functions.size(); i++){
-			t0 = Clock::now(); //timing
-			values.push_back(functions[i](x,c,a,b));
-			//cout << function_names[i] << " " << values.back() << endl;
-			t1 = Clock::now(); //timing
-			ms = std::chrono::duration_cast<milliseconds>(t1 - t0); //timing
-			cout << function_names[i] << ": " << ms.count() << "ms\n";
-		}
-
-		assert_all_equal(values);
-		cout << "=====" << endl;
-	}
-}
