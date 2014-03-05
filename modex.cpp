@@ -209,8 +209,9 @@ int main()
 
 	t0 = Clock::now();
 	mpz_class x, c, n, a, b, result;
-	vector<pair<long,long>> sizes = {{100000, 300}, {100000, 500}, {100000, 1000},
-										{300000, 300}, {100000, 500}, {100000, 1000}};
+	vector<pair<long,long>> sizes = {
+		{100000, 300}, {100000, 500}, {100000, 1000},
+		{300000, 300}, {100000, 500}, {100000, 1000}};
 	for(int i = 0; i < sizes.size(); i++){
 		vector<mpz_class> values;
 		long num_size = sizes[i].first;
