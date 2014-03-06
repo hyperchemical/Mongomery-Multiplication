@@ -74,8 +74,8 @@ void assert_all_equal(vector<mpz_class>& vec);
 
 int main(int argc, char *argv[])
 {
-	vector<long> base_sizes = {50000, 100000};
-	vector<long> prime_sizes = {1000, 2000};
+	vector<long> base_sizes = {5000, 10000};
+	vector<long> prime_sizes = {100, 200};
 
 	Timer timer;
 	//Types of exponentiation
@@ -187,7 +187,7 @@ mpz_class square_and_multiply_exp(mpz_class x, mpz_class c,
 
 	mpz_class z;
 	z = "1";
-	long length = bit_length(c);
+	long length = mpz_sizeinbase(c.get_mpz_t(), 2); //bit_length(c);
 	for(long i = length-1; i >= 0; i--){
 		z = (z*z) % n;
 		if(mpz_tstbit(c.get_mpz_t(),i) == 1)
@@ -287,7 +287,7 @@ mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
 	z = "1";
 	z = (z*r) % n; //Create residues
 	x = (x*r) % n; 
-	long length = bit_length(c);
+	long length = mpz_sizeinbase(c.get_mpz_t(), 2);
 	for(long i = length-1; i >= 0; i--){
 		z = montgomery_reduction((z*z),exponent, n, r);;
 		if(mpz_tstbit(c.get_mpz_t(),i) == 1)
