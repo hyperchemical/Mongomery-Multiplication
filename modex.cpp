@@ -40,7 +40,7 @@ map<pair<mpz_class,mpz_class>, mpz_class> t_m_cache;
 map<mpz_class, pair<mpz_class, mpz_class>> m_cache;
 
 //Generates a b bit prime number
-mpz_class generate_prime(int b);
+mpz_class generate_prime(long b, gmp_randstate_t& rand_state);
 mpz_class square_and_multiply_exp(mpz_class x, mpz_class c, 
 	mpz_class a, mpz_class b);
 mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b);
@@ -76,8 +76,8 @@ int main(int argc, char *argv[])
 
 	//t0 = Clock::now();
 	mpz_class x, c, n, a, b, result;
-	vector<long> base_sizes = {100000, 200000};
-	vector<long> prime_sizes = {500, 1000};
+	vector<long> base_sizes = {500000, 1000000};
+	vector<long> prime_sizes = {1000, 2000};
 	int line_width = 15;
 	cout << left;
 
@@ -90,8 +90,8 @@ int main(int argc, char *argv[])
 			//Generate random x, c, a, b
 			mpz_urandomb(x.get_mpz_t(), rand_state, num_size);
 			mpz_urandomb(c.get_mpz_t(), rand_state, num_size);
-			a = generate_prime(prime_size);
-			b = generate_prime(prime_size);
+			a = generate_prime(prime_size, rand_state);
+			b = generate_prime(prime_size, rand_state);
 
 			n = a*b;
 			t1 = Clock::now();
@@ -131,19 +131,22 @@ int main(int argc, char *argv[])
 	}
 }
 
-mpz_class generate_prime(int b){
+mpz_class generate_prime(long b, gmp_randstate_t& rand_state){
 	mpz_class prime;
-	while(1){
-		prime = "1";
-		for(int i = 0; i < b-1; i++){
-			prime *= 2;
-			if(rand()%2 == 0)
-				mpz_setbit(prime.get_mpz_t(), 0);
-		}
+	// while(1){
+	// 	prime = "1";
+	// 	for(int i = 0; i < b-1; i++){
+	// 		prime *= 2;
+	// 		if(rand()%2 == 0)
+	// 			mpz_setbit(prime.get_mpz_t(), 0);
+	// 	}
 
-		if(mpz_probab_prime_p(prime.get_mpz_t(), 25) >= 1)
-			return prime;
-	}
+	// 	if(mpz_probab_prime_p(prime.get_mpz_t(), 25) >= 1)
+	// 		return prime;
+	// }
+	mpz_urandomb(prime.get_mpz_t(), rand_state, b);
+	mpz_nextprime(prime.get_mpz_t(), prime.get_mpz_t());
+	return prime;
 }
 
 long bit_length(mpz_class x){
