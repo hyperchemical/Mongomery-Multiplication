@@ -46,7 +46,7 @@ class Timer{
 			ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
 		}
 
-		long diff(){
+		long long diff(){
 			return ms.count();
 		}
 	private:
@@ -74,6 +74,9 @@ void assert_all_equal(vector<mpz_class>& vec);
 
 int main(int argc, char *argv[])
 {
+	vector<long> base_sizes = {500000, 1000000};
+	vector<long> prime_sizes = {1000, 2000};
+
 	Timer timer;
 	//Types of exponentiation
 	vector<string> function_names = {"S&M", "S&M w/ Mont","CRT", "CRT w/ Mont"};
@@ -99,8 +102,6 @@ int main(int argc, char *argv[])
 
 	//t0 = Clock::now();
 	mpz_class x, c, n, a, b, result;
-	vector<long> base_sizes = {500000, 1000000};
-	vector<long> prime_sizes = {1000, 2000};
 	int line_width = 15;
 	cout << left;
 
