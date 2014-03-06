@@ -74,7 +74,7 @@ void assert_all_equal(vector<mpz_class>& vec);
 
 int main(int argc, char *argv[])
 {
-	vector<long> base_sizes = {500000, 1000000};
+	vector<long> base_sizes = {50000, 100000};
 	vector<long> prime_sizes = {1000, 2000};
 
 	Timer timer;
@@ -120,6 +120,11 @@ int main(int argc, char *argv[])
 			b = generate_prime(prime_size, rand_state);
 			n = a*b;
 			timer.end();
+
+			// cout << "x: " << x << endl;
+			// cout << "c: " << c << endl;
+			// cout << "a: " << a << endl;
+			// cout << "b: " << b << endl;
 
 			//Table output
 			cout << setw(line_width) << "Info" << "|Results\n";
