@@ -121,6 +121,7 @@ int main(int argc, char *argv[])
 			n = a*b;
 			timer.end();
 
+			//Table output
 			cout << setw(line_width) << "Info" << "|Results\n";
 			cout << setfill('-') << setw(line_width) << "-" <<  "|" << setw(line_width) << "-" << endl;
 			cout << setfill(' ');
@@ -141,7 +142,6 @@ int main(int argc, char *argv[])
 				if(!active[i+1]) continue;
 				timer.begin();
 				values.push_back(functions[i](x,c,a,b));
-				//cout << function_names[i] << " " << values.back() << endl;
 				timer.end();
 				ms = std::chrono::duration_cast<milliseconds>(t1 - t0); //timing
 				cout << setw(line_width) << function_names[i] << "|" << timer.diff() << "ms\n";
@@ -156,17 +156,6 @@ int main(int argc, char *argv[])
 
 mpz_class generate_prime(long b, gmp_randstate_t& rand_state){
 	mpz_class prime;
-	// while(1){
-	// 	prime = "1";
-	// 	for(int i = 0; i < b-1; i++){
-	// 		prime *= 2;
-	// 		if(rand()%2 == 0)
-	// 			mpz_setbit(prime.get_mpz_t(), 0);
-	// 	}
-
-	// 	if(mpz_probab_prime_p(prime.get_mpz_t(), 25) >= 1)
-	// 		return prime;
-	// }
 	mpz_urandomb(prime.get_mpz_t(), rand_state, b);
 	mpz_nextprime(prime.get_mpz_t(), prime.get_mpz_t());
 	return prime;
