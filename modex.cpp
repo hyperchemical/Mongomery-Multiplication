@@ -26,12 +26,33 @@ Fri Dec 13 06:58:20 EST 2013 x86_64 x86_64 x86_64 GNU/Linux
 #include <cassert>
 #include <iomanip>
 
+using namespace std;
+
 typedef std::chrono::high_resolution_clock Clock;
 typedef std::chrono::milliseconds milliseconds;
 
-//TODO: Check CRT w/ Montgomery
+class Timer{
+	public: 
+		Timer(){
+			t0 = Clock::now();
+		}
 
-using namespace std;
+		void begin(){
+			t0 = Clock::now();
+		}
+
+		void end(){
+			Clock::time_point t1 = Clock::now();
+			ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
+		}
+
+		long diff(){
+			return ms.count();
+		}
+	private:
+		Clock::time_point t0;
+		milliseconds ms;
+};
 
 //Global caches for montgomery reductions
 //Takes in M and T, returns m'
@@ -50,8 +71,10 @@ mpz_class montgomery_reduction(mpz_class T, long exponent, mpz_class& r, mpz_cla
 mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b);
 void assert_all_equal(vector<mpz_class>& vec);
 
+
 int main(int argc, char *argv[])
 {
+	Timer timer;
 	//Types of exponentiation
 	vector<string> function_names = {"S&M", "S&M w/ Mont","CRT", "CRT w/ Mont"};
 	vector<bool> active(function_names.size()+1, true);
@@ -88,40 +111,39 @@ int main(int argc, char *argv[])
 			long num_size = base_sizes[i];
 			long prime_size = prime_sizes[j];
 			//Generate random x, c, a, b
+
+			timer.begin();
 			mpz_urandomb(x.get_mpz_t(), rand_state, num_size);
 			mpz_urandomb(c.get_mpz_t(), rand_state, num_size);
 			a = generate_prime(prime_size, rand_state);
 			b = generate_prime(prime_size, rand_state);
-
 			n = a*b;
-			t1 = Clock::now();
-			ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
+			timer.end();
 
 			cout << setw(line_width) << "Info" << "|Results\n";
 			cout << setfill('-') << setw(line_width) << "-" <<  "|" << setw(line_width) << "-" << endl;
 			cout << setfill(' ');
 			cout << setw(line_width) << "Base size" << "|" << num_size << " bits" << endl;
 			cout << setw(line_width) << "Prime size" << "|" << prime_size << " bits" << endl;
-			cout << setw(line_width) << "Generate Prime" << "|" << ms.count() << "ms\n";
+			cout << setw(line_width) << "Generate Nums" << "|" << timer.diff() << "ms\n";
 
 			if(active[0]){
 				//Generate correct answer
-				t0 = Clock::now();
+				timer.begin();
 				mpz_powm(result.get_mpz_t(), x.get_mpz_t(), c.get_mpz_t(), n.get_mpz_t());
+				timer.end();
 				values.push_back(result);
-				t1 = Clock::now();
-				ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
-				cout << setw(line_width) << "mpz_powm" << "|" << ms.count() << "ms\n";
+				cout << setw(line_width) << "mpz_powm" << "|" << timer.diff() << "ms\n";
 			}
 
 			for(int i = 0; i < functions.size(); i++){
 				if(!active[i+1]) continue;
-				t0 = Clock::now(); //timing
+				timer.begin();
 				values.push_back(functions[i](x,c,a,b));
 				//cout << function_names[i] << " " << values.back() << endl;
-				t1 = Clock::now(); //timing
+				timer.end();
 				ms = std::chrono::duration_cast<milliseconds>(t1 - t0); //timing
-				cout << setw(line_width) << function_names[i] << "|" << ms.count() << "ms\n";
+				cout << setw(line_width) << function_names[i] << "|" << timer.diff() << "ms\n";
 			}
 
 			//Verification of correctness
