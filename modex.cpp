@@ -201,13 +201,15 @@ mpz_class square_and_multiply_exp(mpz_class x, mpz_class c,
 	return z;
 }
 
+
 mpz_class chinese_remainder_exp(mpz_class x, mpz_class c,
 	mpz_class a, mpz_class b){
 	mpz_class dp, dq, t, m1, m2, u1, u2, one;
 	one = "1";
 	dp = c % (a-1);
 	dq = c % (b-1);
-	mpz_invert(t.get_mpz_t(), b.get_mpz_t(), a.get_mpz_t());
+	t = square_and_multiply_exp(b, a-2, a, one);
+	// mpz_invert(t.get_mpz_t(), b.get_mpz_t(), a.get_mpz_t());
 	// mpz_powm(m1.get_mpz_t(), x.get_mpz_t(), dp.get_mpz_t(), a.get_mpz_t());
 	// mpz_powm(m2.get_mpz_t(), x.get_mpz_t(), dq.get_mpz_t(), b.get_mpz_t());
 	m1 = square_and_multiply_exp(x, dp, a, one);
@@ -233,15 +235,16 @@ mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b)
 	one = "1";
 	dp = c % (a-1);
 	dq = c % (b-1);
-	mpz_invert(t.get_mpz_t(), b.get_mpz_t(), a.get_mpz_t());
+	t = montgomery_exp(b, a-2, a, one);
+	// mpz_invert(t.get_mpz_t(), b.get_mpz_t(), a.get_mpz_t());
 	// mpz_powm(m1.get_mpz_t(), x.get_mpz_t(), dp.get_mpz_t(), a.get_mpz_t());
 	// mpz_powm(m2.get_mpz_t(), x.get_mpz_t(), dq.get_mpz_t(), b.get_mpz_t());
-	m1 = square_and_multiply_exp(x, dp, a, one);
-	m2 = square_and_multiply_exp(x, dq, b, one);
+	m1 = montgomery_exp(x, dp, a, one);
+	m2 = montgomery_exp(x, dq, b, one);
 
 	u1 = (m1-m2)*r;
-	mpz_mod(u1.get_mpz_t(), u1.get_mpz_t(), a.get_mpz_t());
 	t = (t*r);
+	mpz_mod(u1.get_mpz_t(), u1.get_mpz_t(), a.get_mpz_t());
 	mpz_mod(t.get_mpz_t(), t.get_mpz_t(), a.get_mpz_t());
 	u2 = montgomery_reduction((u1*t), exponent, a, r);
 	u2 = montgomery_reduction(u2, exponent, a, r);
@@ -282,14 +285,17 @@ mpz_class montgomery_reduction(mpz_class T, long exponent, mpz_class& M, mpz_cla
 
 
 mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
-	mpz_class n, r, rinv;
+	mpz_class n, r, rinv, one;
 	n = a*b;
+	one = "1";
 	r = "2";
 	long exponent = 1;
 	for(;r < n; exponent++){
 		r = r*2;
 	}
-	mpz_invert(rinv.get_mpz_t(), r.get_mpz_t(), n.get_mpz_t());
+	//Invert r
+	rinv = square_and_multiply_exp(r, (a-1)*(b-1), n, one);
+	//mpz_invert(rinv.get_mpz_t(), r.get_mpz_t(), n.get_mpz_t());
 
 	mpz_class z;
 	z = "1";
