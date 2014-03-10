@@ -222,17 +222,18 @@ mpz_class chinese_remainder_exp(mpz_class x, mpz_class c,
 }
 
 mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
-	mpz_class n, r, rinv;
+	mpz_class n, r, rinv, one;
+	one = "1";
 	n = a*b;
 	r = "2";
 	long exponent = 1;
 	for(;r < a; exponent++){
 		r = r*2;
 	}
-	mpz_invert(rinv.get_mpz_t(), r.get_mpz_t(), n.get_mpz_t());
+	rinv = square_and_multiply_exp(r, (a-1)*(b-1)-1, n, one);
+	//mpz_invert(rinv.get_mpz_t(), r.get_mpz_t(), n.get_mpz_t());
 
-	mpz_class dp, dq, t, m1, m2, u1, u2, one;
-	one = "1";
+	mpz_class dp, dq, t, m1, m2, u1, u2;
 	dp = c % (a-1);
 	dq = c % (b-1);
 	t = montgomery_exp(b, a-2, a, one);
@@ -294,7 +295,7 @@ mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
 		r = r*2;
 	}
 	//Invert r
-	rinv = square_and_multiply_exp(r, (a-1)*(b-1), n, one);
+	rinv = square_and_multiply_exp(r, (a-1)*(b-1)-1, n, one);
 	//mpz_invert(rinv.get_mpz_t(), r.get_mpz_t(), n.get_mpz_t());
 
 	mpz_class z;
@@ -303,7 +304,7 @@ mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
 	x = (x*r) % n; 
 	long length = mpz_sizeinbase(c.get_mpz_t(), 2);
 	for(long i = length-1; i >= 0; i--){
-		z = montgomery_reduction((z*z),exponent, n, r);;
+		z = montgomery_reduction((z*z),exponent, n, r);
 		if(mpz_tstbit(c.get_mpz_t(),i) == 1)
 		{
 			z = montgomery_reduction((z*x),exponent,n, r);	
