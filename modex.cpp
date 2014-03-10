@@ -67,7 +67,7 @@ mpz_class square_and_multiply_exp(mpz_class x, mpz_class c,
 mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b);
 mpz_class chinese_remainder_exp(mpz_class x, mpz_class c,
 	mpz_class a, mpz_class b);
-mpz_class montgomery_reduction(mpz_class T, long exponent, mpz_class& r, mpz_class& M);
+mpz_class montgomery_reduction(mpz_class T, long exponent, const mpz_class& r, const mpz_class& M);
 mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b);
 void assert_all_equal(vector<mpz_class>& vec);
 
@@ -230,8 +230,6 @@ mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b)
 	for(;r < a; exponent++){
 		r = r*2;
 	}
-	rinv = square_and_multiply_exp(r, (a-1)*(b-1)-1, n, one);
-	//mpz_invert(rinv.get_mpz_t(), r.get_mpz_t(), n.get_mpz_t());
 
 	mpz_class dp, dq, t, m1, m2, u1, u2;
 	dp = c % (a-1);
@@ -252,11 +250,14 @@ mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b)
 	return m2 + u2*b;
 }
 
-mpz_class montgomery_reduction(mpz_class T, long exponent, mpz_class& M, mpz_class & r){
-	mpz_class m, Minv, Mprime, t;
+mpz_class montgomery_reduction(mpz_class T, long exponent, const mpz_class& M, const mpz_class & r){
+	mpz_class m, Minv, Mprime, t, one, two;
+	one = "1";
+	two = "2";
 
 	if(m_cache.find(M) == m_cache.end()){
-		mpz_invert(Minv.get_mpz_t(), M.get_mpz_t(), r.get_mpz_t());
+		Minv = square_and_multiply_exp(M, r - r/2 - 1, r, one);
+		//mpz_fdiv_r_2exp(Mprime.get_mpz_t(), Mprime.get_mpz_t(), exponent);
 		Mprime = (-1 * (Minv));
 		//Right shifts instead of mod
 		mpz_fdiv_r_2exp(Mprime.get_mpz_t(), Mprime.get_mpz_t(), exponent);
@@ -294,9 +295,6 @@ mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
 	for(;r < n; exponent++){
 		r = r*2;
 	}
-	//Invert r
-	rinv = square_and_multiply_exp(r, (a-1)*(b-1)-1, n, one);
-	//mpz_invert(rinv.get_mpz_t(), r.get_mpz_t(), n.get_mpz_t());
 
 	mpz_class z;
 	z = "1";
@@ -307,7 +305,7 @@ mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
 		z = montgomery_reduction((z*z),exponent, n, r);
 		if(mpz_tstbit(c.get_mpz_t(),i) == 1)
 		{
-			z = montgomery_reduction((z*x),exponent,n, r);	
+			z = montgomery_reduction((z*x),exponent, n, r);	
 		}
 	}
 
