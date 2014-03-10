@@ -5,6 +5,8 @@ heyoh@umich.edu
 hning@umich.edu
 milewa@umich.edu
 
+I'm not sure if any of this actually works, so it's probably good to look it over hah - hning.
+
 Command Line Arguments
 -------------
 Takes optional command line arguments. By default, runs all algorithms.
