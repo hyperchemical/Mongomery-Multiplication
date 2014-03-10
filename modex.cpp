@@ -257,7 +257,6 @@ mpz_class montgomery_reduction(mpz_class T, long exponent, const mpz_class& M, c
 		Mprime = (-1 * (Minv));
 		//Right shifts instead of mod
 		mpz_fdiv_r_2exp(Mprime.get_mpz_t(), Mprime.get_mpz_t(), exponent);
-		//mpz_mod(Mprime.get_mpz_t(), Mprime.get_mpz_t(), r.get_mpz_t());
 		m_cache[M] = {Minv, Mprime};
 	}
 	else{
@@ -270,7 +269,6 @@ mpz_class montgomery_reduction(mpz_class T, long exponent, const mpz_class& M, c
 		m = (T*Mprime);
 		//Right shifts instead of mod
 		mpz_fdiv_r_2exp(m.get_mpz_t(), m.get_mpz_t(), exponent);
-		//mpz_mod(m.get_mpz_t(), m.get_mpz_t(), r.get_mpz_t());
 		t_m_cache[{M,T}] = m;
 	}
 	else { //Cached
