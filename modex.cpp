@@ -57,7 +57,7 @@ class Timer{
 //Global caches for montgomery reductions
 //Takes in M and T, returns m'
 map<pair<mpz_class,mpz_class>, mpz_class> t_m_cache;
-//Takes in M, returns Minv and M' [SIGNIFICANT SPEEDUP]
+//Takes in M, returns Minv and M' 
 map<mpz_class, pair<mpz_class, mpz_class>> m_cache;
 
 //Generates a b bit prime number
@@ -208,10 +208,8 @@ mpz_class chinese_remainder_exp(mpz_class x, mpz_class c,
 	one = "1";
 	dp = c % (a-1);
 	dq = c % (b-1);
+	//Invert b
 	t = square_and_multiply_exp(b, a-2, a, one);
-	// mpz_invert(t.get_mpz_t(), b.get_mpz_t(), a.get_mpz_t());
-	// mpz_powm(m1.get_mpz_t(), x.get_mpz_t(), dp.get_mpz_t(), a.get_mpz_t());
-	// mpz_powm(m2.get_mpz_t(), x.get_mpz_t(), dq.get_mpz_t(), b.get_mpz_t());
 	m1 = square_and_multiply_exp(x, dp, a, one);
 	m2 = square_and_multiply_exp(x, dq, b, one);
 	u1 = (m1-m2);
@@ -234,10 +232,8 @@ mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b)
 	mpz_class dp, dq, t, m1, m2, u1, u2;
 	dp = c % (a-1);
 	dq = c % (b-1);
+	//Invert b
 	t = montgomery_exp(b, a-2, a, one);
-	// mpz_invert(t.get_mpz_t(), b.get_mpz_t(), a.get_mpz_t());
-	// mpz_powm(m1.get_mpz_t(), x.get_mpz_t(), dp.get_mpz_t(), a.get_mpz_t());
-	// mpz_powm(m2.get_mpz_t(), x.get_mpz_t(), dq.get_mpz_t(), b.get_mpz_t());
 	m1 = montgomery_exp(x, dp, a, one);
 	m2 = montgomery_exp(x, dq, b, one);
 
