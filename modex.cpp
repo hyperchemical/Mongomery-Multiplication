@@ -71,11 +71,13 @@ mpz_class montgomery_reduction(mpz_class T, long exponent, mpz_class& r, mpz_cla
 mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b);
 void assert_all_equal(vector<mpz_class>& vec);
 
+// mpz_class chinese_remainder_exp_sm(mpz_class x, mpz_class c,
+// 	mpz_class a, mpz_class b);
 
 int main(int argc, char *argv[])
 {
-	vector<long> base_sizes = {5000, 10000};
-	vector<long> prime_sizes = {100, 200};
+	vector<long> base_sizes = {50000, 100000};
+	vector<long> prime_sizes = {1000, 2000};
 
 	Timer timer;
 	//Types of exponentiation
@@ -201,12 +203,15 @@ mpz_class square_and_multiply_exp(mpz_class x, mpz_class c,
 
 mpz_class chinese_remainder_exp(mpz_class x, mpz_class c,
 	mpz_class a, mpz_class b){
-	mpz_class dp, dq, t, m1, m2, u1, u2;
+	mpz_class dp, dq, t, m1, m2, u1, u2, one;
+	one = "1";
 	dp = c % (a-1);
 	dq = c % (b-1);
 	mpz_invert(t.get_mpz_t(), b.get_mpz_t(), a.get_mpz_t());
-	mpz_powm(m1.get_mpz_t(), x.get_mpz_t(), dp.get_mpz_t(), a.get_mpz_t());
-	mpz_powm(m2.get_mpz_t(), x.get_mpz_t(), dq.get_mpz_t(), b.get_mpz_t());
+	// mpz_powm(m1.get_mpz_t(), x.get_mpz_t(), dp.get_mpz_t(), a.get_mpz_t());
+	// mpz_powm(m2.get_mpz_t(), x.get_mpz_t(), dq.get_mpz_t(), b.get_mpz_t());
+	m1 = square_and_multiply_exp(x, dp, a, one);
+	m2 = square_and_multiply_exp(x, dq, b, one);
 	u1 = (m1-m2);
 	mpz_mod(u1.get_mpz_t(), u1.get_mpz_t(), a.get_mpz_t());
 	u2 = (u1*t);
@@ -224,12 +229,15 @@ mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b)
 	}
 	mpz_invert(rinv.get_mpz_t(), r.get_mpz_t(), n.get_mpz_t());
 
-	mpz_class dp, dq, t, m1, m2, u1, u2;
+	mpz_class dp, dq, t, m1, m2, u1, u2, one;
+	one = "1";
 	dp = c % (a-1);
 	dq = c % (b-1);
 	mpz_invert(t.get_mpz_t(), b.get_mpz_t(), a.get_mpz_t());
-	mpz_powm(m1.get_mpz_t(), x.get_mpz_t(), dp.get_mpz_t(), a.get_mpz_t());
-	mpz_powm(m2.get_mpz_t(), x.get_mpz_t(), dq.get_mpz_t(), b.get_mpz_t());
+	// mpz_powm(m1.get_mpz_t(), x.get_mpz_t(), dp.get_mpz_t(), a.get_mpz_t());
+	// mpz_powm(m2.get_mpz_t(), x.get_mpz_t(), dq.get_mpz_t(), b.get_mpz_t());
+	m1 = square_and_multiply_exp(x, dp, a, one);
+	m2 = square_and_multiply_exp(x, dq, b, one);
 
 	u1 = (m1-m2)*r;
 	mpz_mod(u1.get_mpz_t(), u1.get_mpz_t(), a.get_mpz_t());
