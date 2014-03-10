@@ -68,7 +68,7 @@ mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b)
 mpz_class chinese_remainder_exp(mpz_class x, mpz_class c,
 	mpz_class a, mpz_class b);
 mpz_class montgomery_reduction(mpz_class T, long exponent, const mpz_class& r, const mpz_class& M);
-mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b);
+mpz_class square_and_multiply_montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b);
 void assert_all_equal(vector<mpz_class>& vec);
 
 // mpz_class chinese_remainder_exp_sm(mpz_class x, mpz_class c,
@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 	vector<string> function_names = {"S&M", "S&M w/ Mont","CRT", "CRT w/ Mont"};
 	vector<bool> active(function_names.size()+1, true);
 	vector<mpz_class (*)(mpz_class, mpz_class, mpz_class, mpz_class)> functions
-		= {square_and_multiply_exp, montgomery_exp, chinese_remainder_exp,
+		= {square_and_multiply_exp, square_and_multiply_montgomery_exp, chinese_remainder_exp,
 			montgomery_crt_exp};
 
 	//Deactivate algorithms as needed
@@ -233,9 +233,9 @@ mpz_class montgomery_crt_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b)
 	dp = c % (a-1);
 	dq = c % (b-1);
 	//Invert b
-	t = montgomery_exp(b, a-2, a, one);
-	m1 = montgomery_exp(x, dp, a, one);
-	m2 = montgomery_exp(x, dq, b, one);
+	t = square_and_multiply_montgomery_exp(b, a-2, a, one);
+	m1 = square_and_multiply_montgomery_exp(x, dp, a, one);
+	m2 = square_and_multiply_montgomery_exp(x, dq, b, one);
 
 	u1 = (m1-m2)*r;
 	t = (t*r);
@@ -282,7 +282,7 @@ mpz_class montgomery_reduction(mpz_class T, long exponent, const mpz_class& M, c
 }
 
 
-mpz_class montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
+mpz_class square_and_multiply_montgomery_exp(mpz_class x, mpz_class c, mpz_class a, mpz_class b){
 	mpz_class n, r, rinv, one;
 	n = a*b;
 	one = "1";
