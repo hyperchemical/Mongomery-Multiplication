@@ -27,45 +27,45 @@ Sample Output
 
 Info           |Results
 ---------------|---------------
-Base size      |100000
-Prime size     |500
-Generate Prime |35ms
-mpz_powm       |151ms
-S&M            |5280ms
-S&M w/ Mont    |938ms
-CRT            |0ms
-CRT w/ Mont    |0ms
+Base size      |50000 bits
+Prime size     |1000 bits
+Generate Nums  |179ms
+mpz_powm       |281ms
+S&M            |2397ms
+S&M w/ Mont    |1048ms
+CRT            |51ms
+CRT w/ Mont    |38ms
 
 Info           |Results
 ---------------|---------------
-Base size      |100000
-Prime size     |1000
-Generate Prime |123ms
-mpz_powm       |254ms
-S&M            |8671ms
-S&M w/ Mont    |2155ms
-CRT            |1ms
-CRT w/ Mont    |1ms
+Base size      |50000 bits
+Prime size     |2000 bits
+Generate Nums  |1618ms
+mpz_powm       |482ms
+S&M            |3980ms
+S&M w/ Mont    |2694ms
+CRT            |189ms
+CRT w/ Mont    |148ms
 
 Info           |Results
 ---------------|---------------
-Base size      |200000
-Prime size     |500
-Generate Prime |47ms
-mpz_powm       |139ms
-S&M            |19151ms
-S&M w/ Mont    |2267ms
-CRT            |0ms
-CRT w/ Mont    |0ms
+Base size      |100000 bits
+Prime size     |1000 bits
+Generate Nums  |262ms
+mpz_powm       |258ms
+S&M            |8746ms
+S&M w/ Mont    |2310ms
+CRT            |103ms
+CRT w/ Mont    |39ms
 
 Info           |Results
 ---------------|---------------
-Base size      |200000
-Prime size     |1000
-Generate Prime |237ms
-mpz_powm       |508ms
-S&M            |33983ms
-S&M w/ Mont    |4405ms
-CRT            |2ms
-CRT w/ Mont    |2ms
+Base size      |100000 bits
+Prime size     |2000 bits
+Generate Nums  |603ms
+mpz_powm       |937ms
+S&M            |14635ms
+S&M w/ Mont    |5312ms
+CRT            |368ms
+CRT w/ Mont    |152ms
 
