@@ -5,7 +5,7 @@ LD_RUN_PATH := /usr/um/gcc-4.7.0/lib64
 
 #Shortcuts
 SFLAG = -std=c++11 -O3
-TFLAG = -lgmpxx -lgmp
+TFLAG = 
 DFLAG = -Wall -Wextra -pedantic -Wvla -g -ggdb  -pg
 FILE = modex.cpp
 OUT= -o modex
