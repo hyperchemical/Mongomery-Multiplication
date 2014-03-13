@@ -122,19 +122,15 @@ int main(int argc, char *argv[])
 			//Generate random x, c, a, b
 
 			timer.begin();
-			// mpz_urandomb(x, rand_state, num_size);
-			// mpz_urandomb(c, rand_state, num_size);
-			//a = generate_prime(prime_size, rand_state);
-			//b = generate_prime(prime_size, rand_state);
-			x = 33;
-			c = 24;
+			x = 563;//x.random(10);
+			c = 956;//c.random(10);
 			a = 881;
 			b = 883;
 			n = a*b;
 			timer.end();
 
-			// cout << "x: " << x << endl;
-			// cout << "c: " << c << endl;
+			cout << "x: " << x << endl;
+			cout << "c: " << c << endl;
 			// cout << "a: " << a << endl;
 			// cout << "b: " << b << endl;
 
@@ -147,17 +143,17 @@ int main(int argc, char *argv[])
 			cout << setw(line_width) << "Generate Nums" << "|" << timer.diff() << "ms\n";
 
 			if(active[0]){
-				//Generate correct answer
-				timer.begin();
-				uberzahl x3 = x;
-				for(uberzahl i = 1; i < c; i = i + 1){
-					x3 = (x3 * x3) % n;
-				}
-				cout << x3 << endl;
-				//mpz_powm(result, x, c, n);
-				timer.end();
-				values.push_back(x3);
-				cout << setw(line_width) << "mpz_powm" << "|" << timer.diff() << "ms\n";
+				// //Generate correct answer
+				// timer.begin();
+				// uberzahl x3 = x;
+				// for(uberzahl i = 1; i < c; i = i + 1){
+				// 	x3 = (x3 * x3) % n;
+				// }
+				// cout << x3 << endl;
+				// //mpz_powm(result, x, c, n);
+				// timer.end();
+				// values.push_back(x3);
+				// cout << setw(line_width) << "mpz_powm" << "|" << timer.diff() << "ms\n";
 			}
 
 			for(int i = 0; i < functions.size(); i++){
@@ -210,14 +206,13 @@ uberzahl square_and_multiply_exp(uberzahl x, uberzahl c,
 
 uberzahl chinese_remainder_exp(uberzahl x, uberzahl c,
 	uberzahl a, uberzahl b){
-	uberzahl dp, dq, t, m1, m2, u1, u2, one;
-	one = 1;
+	uberzahl dp, dq, t, m1, m2, u1, u2, one("1");
 	// dp = mod_by_div(c, (a-1));
 	// dq = mod_by_div(c, (b-1));
 	dp = c % (a-1);
 	dq = c % (b-1);
 	//Invert b
-	t = square_and_multiply_exp(b, a-2, a, one);
+	t = b.inverse(a);
 	m1 = square_and_multiply_exp(x, dp, a, one);
 	m2 = square_and_multiply_exp(x, dq, b, one);
 	// u1 = mod_by_div((m1-m2), a);
@@ -245,7 +240,12 @@ uberzahl montgomery_crt_exp(uberzahl x, uberzahl c, uberzahl a, uberzahl b){
 	m1 = square_and_multiply_montgomery_exp(x, dp, a, one);
 	m2 = square_and_multiply_montgomery_exp(x, dq, b, one);
 
-	u1 = (m1-m2) % a;
+	if(m2 > m1){
+		u1 = (m2-m1) % a;
+	}
+	else{
+		u1 = (m1-m2) % a;
+	}
 	u2 = (u1*t) % a;
 	// u2 = montgomery_reduction((u1*t), exponent, a, r);
 	// u2 = montgomery_reduction(u2, exponent, a, r);
@@ -315,7 +315,7 @@ uberzahl square_and_multiply_montgomery_exp(uberzahl x, uberzahl c, uberzahl a, 
 		length = length - 1;
 	}
 
-	return (z*rinv) % n;//mod_by_div(z*rinv,n);//montgomery_reduction(z,exponent,n, r);
+	return (z*rinv) % n;
 }
 
 void assert_all_equal(vector<uberzahl>& vec)
