@@ -25,47 +25,56 @@ For example the following disables montgomery reduction algorithms:
 Sample Output
 -------------
 
+x: 13
+c: 1023
+a: 881
+b: 883
 Info           |Results
 ---------------|---------------
-Base size      |50000 bits
+Base size      |13 bits
+Exponent size  |10 bits
 Prime size     |1000 bits
-Generate Nums  |179ms
-mpz_powm       |281ms
-S&M            |2397ms
-S&M w/ Mont    |1048ms
-CRT            |51ms
-CRT w/ Mont    |38ms
+Result: 401718
+S&M            |1ms
+Result: 401718
+S&M w/ Mont    |5ms
+Result: 401718
+CRT            |0ms
+Result: 401718
+CRT w/ Mont    |4ms
 
+x: 13
+c: 1024
+a: 881
+b: 883
 Info           |Results
 ---------------|---------------
-Base size      |50000 bits
-Prime size     |2000 bits
-Generate Nums  |1618ms
-mpz_powm       |482ms
-S&M            |3980ms
-S&M w/ Mont    |2694ms
-CRT            |189ms
-CRT w/ Mont    |148ms
-
-Info           |Results
----------------|---------------
-Base size      |100000 bits
+Base size      |13 bits
+Exponent size  |10 bits
 Prime size     |1000 bits
-Generate Nums  |262ms
-mpz_powm       |258ms
-S&M            |8746ms
-S&M w/ Mont    |2310ms
-CRT            |103ms
-CRT w/ Mont    |39ms
+Result: 554796
+S&M            |0ms
+Result: 554796
+S&M w/ Mont    |4ms
+Result: 554796
+CRT            |0ms
+Result: 554796
+CRT w/ Mont    |5ms
 
+x: 13
+c: 1025
+a: 881
+b: 883
 Info           |Results
 ---------------|---------------
-Base size      |100000 bits
-Prime size     |2000 bits
-Generate Nums  |603ms
-mpz_powm       |937ms
-S&M            |14635ms
-S&M w/ Mont    |5312ms
-CRT            |368ms
-CRT w/ Mont    |152ms
-
+Base size      |13 bits
+Exponent size  |10 bits
+Prime size     |1000 bits
+Result: 211041
+S&M            |0ms
+Result: 211041
+S&M w/ Mont    |4ms
+Result: 211041
+CRT            |0ms
+Result: 211041
+CRT w/ Mont    |4ms
