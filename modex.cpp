@@ -72,7 +72,7 @@ uberzahl square_and_multiply_exp(uberzahl x, uberzahl c,
 uberzahl montgomery_crt_exp(uberzahl x, uberzahl c, uberzahl a, uberzahl b);
 uberzahl chinese_remainder_exp(uberzahl x, uberzahl c,
 	uberzahl a, uberzahl b);
-uberzahl montgomery_reduction(uberzahl T, long exponent, const uberzahl& r, const uberzahl& M);
+uberzahl montgomery_reduction(uberzahl T, long exponent, uberzahl r,  uberzahl M);
 uberzahl square_and_multiply_montgomery_exp(uberzahl x, uberzahl c, uberzahl a, uberzahl b);
 void assert_all_equal(vector<uberzahl>& vec);
 
@@ -82,7 +82,8 @@ void assert_all_equal(vector<uberzahl>& vec);
 
 int main(int argc, char *argv[])
 {
-	vector<long> base_sizes = {50000, 100000};
+	vector<long> base_sizes = {100, 200};
+	vector<long> exponent_sizes = {100, 200};
 	vector<long> prime_sizes = {1000, 2000};
 
 	Timer timer;
@@ -119,8 +120,8 @@ int main(int argc, char *argv[])
 			//Generate random x, c, a, b
 
 			timer.begin();
-			x = 563;//x.random(10);
-			c = 956;//c.random(10);
+			x = x.random(base_sizes[i]);//x.random(10);
+			c = x.random(exponent_sizes[i]);//c.random(10);
 			a = 881;
 			b = 883;
 			n = a*b;
@@ -157,8 +158,6 @@ int main(int argc, char *argv[])
 				if(!active[i+1]) continue;
 				timer.begin();
 				values.push_back(functions[i](x,c,a,b));
-				cout << "done2\n";
-				cout << values.back() << endl;
 				timer.end();
 				ms = std::chrono::duration_cast<milliseconds>(t1 - t0); //timing
 				cout << setw(line_width) << function_names[i] << "|" << timer.diff() << "ms\n";
@@ -203,20 +202,25 @@ uberzahl square_and_multiply_exp(uberzahl x, uberzahl c,
 
 uberzahl chinese_remainder_exp(uberzahl x, uberzahl c,
 	uberzahl a, uberzahl b){
-	uberzahl dp, dq, t, m1, m2, u1, u2, one("1");
+	uberzahl dp, dq, t, m1, m2, u, one("1");
 	// dp = mod_by_div(c, (a-1));
 	// dq = mod_by_div(c, (b-1));
 	dp = c % (a-1);
 	dq = c % (b-1);
 	//Invert b
 	t = b.inverse(a);
-	m1 = square_and_multiply_exp(x, dp, a, one);
-	m2 = square_and_multiply_exp(x, dq, b, one);
+	m1 = square_and_multiply_exp(x, dp, a, one) % a;
+	m2 = square_and_multiply_exp(x, dq, b, one) % a;
 	// u1 = mod_by_div((m1-m2), a);
 	// u2 = mod_by_div((u1*t), a);
-	u1 = (m1-m2) % a;
-	u2 = (u1*t) % a;
-	return m2 + u2*b;
+
+
+	if(m2 > m1){
+		m1 = m1 + a;
+	}
+
+	u = (m1-m2)*t % a;
+	return m2 + u*b;
 }
 
 uberzahl montgomery_crt_exp(uberzahl x, uberzahl c, uberzahl a, uberzahl b){
@@ -229,35 +233,29 @@ uberzahl montgomery_crt_exp(uberzahl x, uberzahl c, uberzahl a, uberzahl b){
 		r = r*2;
 	}
 
-	uberzahl dp, dq, t, m1, m2, u1, u2;
+	uberzahl dp, dq, t, m1, m2, u;
 	dp = c % (a-1);
 	dq = c % (b-1);
 	//Invert b
 	t = b.inverse(a);
-	m1 = square_and_multiply_montgomery_exp(x, dp, a, one);
-	m2 = square_and_multiply_montgomery_exp(x, dq, b, one);
+	m1 = square_and_multiply_montgomery_exp(x, dp, a, one) % a;
+	m2 = square_and_multiply_montgomery_exp(x, dq, b, one) % a;
+
 
 	if(m2 > m1){
-		u1 = (m2-m1) % a;
+		m1 = m1 + a;
 	}
-	else{
-		u1 = (m1-m2) % a;
-	}
-	u2 = (u1*t) % a;
-	// u2 = montgomery_reduction((u1*t), exponent, a, r);
-	// u2 = montgomery_reduction(u2, exponent, a, r);
-	// u2 = (u2*t*rinv) % r;
-	// u2 = (u2*rinv) % r;
-	return m2 + u2*b;
+
+	u = (m1-m2)*t % a;
+	return m2 + u*b;
 }
 
-uberzahl montgomery_reduction(uberzahl T, long exponent, const uberzahl& M, const uberzahl & r){
-	uberzahl m, Minv, Mprime, t, negone;
-	negone = "-1";
-
+uberzahl montgomery_reduction(uberzahl T, long exponent, uberzahl M, uberzahl r){
+	uberzahl m, Minv, Mprime, t;
 	if(m_cache.find(M) == m_cache.end()){
-		Minv = m.inverse(r);
-		Mprime = (negone*Minv) % r;
+		Minv = M.inverse(r);
+		Mprime = r - Minv; //(negone*Minv) % r;
+
 
 		m_cache[M] = {Minv, Mprime};
 	}
@@ -302,17 +300,19 @@ uberzahl square_and_multiply_montgomery_exp(uberzahl x, uberzahl c, uberzahl a, 
 	x = (x*r) % n;
 	unsigned int length = c.bitLength() - 1; //bit_length(c);
 	while(1){
-		z = (z*z*rinv) % n;
-		//if(mpz_tstbit(c,i) == 1)
+		//z = (z*z*rinv) % n;
+		z = z * z;
+		z = montgomery_reduction(z, exponent, n, r);
 		if(c.bit(length) == 1)
 		{
-			z = (z*x*rinv) % n;
+			z = z * x;
+			z = montgomery_reduction(z, exponent, n, r);
 		}
 		if(length == 0) break;
 		length = length - 1;
 	}
 
-	return (z*rinv) % n;
+	return montgomery_reduction(z, exponent, n, r);
 }
 
 void assert_all_equal(vector<uberzahl>& vec)
