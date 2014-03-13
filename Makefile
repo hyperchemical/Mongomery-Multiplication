@@ -7,7 +7,7 @@ LD_RUN_PATH := /usr/um/gcc-4.7.0/lib64
 SFLAG = -std=c++11 -O3
 TFLAG = 
 DFLAG = -Wall -Wextra -pedantic -Wvla -g -ggdb  -pg
-FILE = modex.cpp
+FILE = modex.cpp uberzahl.cpp
 OUT= -o modex
 
 #Submit
