@@ -99,9 +99,6 @@ int main(int argc, char *argv[])
 			active[i-1] = false;
 		}
 	}
-
-	// gmp_randstate_t rand_state;
-	// gmp_randinit_default(rand_state);
 	srand(time(NULL));
 
 	Clock::time_point t0 = Clock::now();
