@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	cout << endl;
+	cout << "Average Times:\n";
 	for(int i = 0; i < functions.size(); i++){
 		cout << function_names[i] << ": " << total_times[i]/num_times_executed << " ms\n";
 	}
