@@ -115,65 +115,67 @@ int main(int argc, char *argv[])
 	int line_width = 15;
 	cout << left;
 
-	x = x.random(base_size);
-	c = c.random(exponent_size);
-	//Run algorithms for all pairs of sizes
-	for(int k = 0; k < primes.size(); k+=2){
-		vector<uberzahl> values;
+	for(int i = 0; i < 10; i++){
+		x = x.random(base_size);
+		c = c.random(exponent_size);
+		//Run algorithms for all pairs of sizes
+		for(int k = 0; k < 1; k+=2){
+			vector<uberzahl> values;
 
-		//long prime_size = prime_sizes[j];
-		//Generate random x, c, a, b
+			//long prime_size = prime_sizes[j];
+			//Generate random x, c, a, b
 
-		timer.begin();
-
-		a = primes[k];
-		b = primes[k+1];
-		n = a*b;
-
-		b = b % ((a-1)*(b-1));
-		timer.end();
-
-		cout << "x: " << x << endl;
-		cout << "c: " << c << endl;
-		cout << "a: " << a << endl;
-		cout << "b: " << b << endl;
-
-		//Table output
-		cout << setw(line_width) << "Info" << "|Results\n";
-		cout << setfill('-') << setw(line_width) << "-" <<  "|" << setw(line_width) << "-" << endl;
-		cout << setfill(' ');
-		cout << setw(line_width) << "Base size" << "|" << base_size << " bits" << endl;
-		cout << setw(line_width) << "Exponent size"  << "|" << exponent_size << " bits" << endl;
-		cout << setw(line_width) << "Prime size" << "|" << primes[k].bitLength() << " bits" << endl;
-		//cout << setw(line_width) << "Generate Nums" << "|" << timer.diff() << "ms\n";
-
-		if(active[0]){
-			// //Generate correct answer
-			// timer.begin();
-			// uberzahl x3 = x;
-			// for(uberzahl i = 1; i < c; i = i + 1){
-			// 	x3 = (x3 * x3) % n;
-			// }
-			// cout << x3 << endl;
-			// //mpz_powm(result, x, c, n);
-			// timer.end();
-			// values.push_back(x3);
-			// cout << setw(line_width) << "mpz_powm" << "|" << timer.diff() << "ms\n";
-		}
-
-		for(int i = 0; i < functions.size(); i++){
-			if(!active[i+1]) continue;
 			timer.begin();
-			values.push_back(functions[i](x,c,a,b));
-			timer.end();
-			ms = std::chrono::duration_cast<milliseconds>(t1 - t0); //timing
-			cout << "Result: " << values.back() << endl;
-			cout << setw(line_width) << function_names[i] << "|" << timer.diff() << "ms\n";
-		}
 
-		//Verification of correctness
-		assert_all_equal(values);
-		cout << endl;
+			a = primes[k];
+			b = primes[k+1];
+			n = a*b;
+
+			b = b % ((a-1)*(b-1));
+			timer.end();
+
+			cout << "x: " << x << endl;
+			cout << "c: " << c << endl;
+			cout << "a: " << a << endl;
+			cout << "b: " << b << endl;
+
+			//Table output
+			cout << setw(line_width) << "Info" << "|Results\n";
+			cout << setfill('-') << setw(line_width) << "-" <<  "|" << setw(line_width) << "-" << endl;
+			cout << setfill(' ');
+			cout << setw(line_width) << "Base size" << "|" << base_size << " bits" << endl;
+			cout << setw(line_width) << "Exponent size"  << "|" << exponent_size << " bits" << endl;
+			cout << setw(line_width) << "Prime size" << "|" << primes[k].bitLength() << " bits" << endl;
+			//cout << setw(line_width) << "Generate Nums" << "|" << timer.diff() << "ms\n";
+
+			if(active[0]){
+				// //Generate correct answer
+				// timer.begin();
+				// uberzahl x3 = x;
+				// for(uberzahl i = 1; i < c; i = i + 1){
+				// 	x3 = (x3 * x3) % n;
+				// }
+				// cout << x3 << endl;
+				// //mpz_powm(result, x, c, n);
+				// timer.end();
+				// values.push_back(x3);
+				// cout << setw(line_width) << "mpz_powm" << "|" << timer.diff() << "ms\n";
+			}
+
+			for(int i = 0; i < functions.size(); i++){
+				if(!active[i+1]) continue;
+				timer.begin();
+				values.push_back(functions[i](x,c,a,b));
+				timer.end();
+				ms = std::chrono::duration_cast<milliseconds>(t1 - t0); //timing
+				cout << "Result: " << values.back() << endl;
+				cout << setw(line_width) << function_names[i] << "|" << timer.diff() << "ms\n";
+			}
+
+			//Verification of correctness
+			assert_all_equal(values);
+			cout << endl;
+		}
 	}
 }
 
@@ -206,10 +208,9 @@ uberzahl chinese_remainder_exp(uberzahl x, uberzahl c,
 	dp = c % (a-1);
 	dq = c % (b-1);
 
-
 	t = b.inverse(a);
-	m1 = square_and_multiply_exp(x, dp, a, one) % a;
-	m2 = square_and_multiply_exp(x, dq, b, one) % a;
+	m1 = square_and_multiply_exp(x, dp, a, one);// % a;
+	m2 = square_and_multiply_exp(x, dq, b, one);// % a;
 
 
 	if(m2 > m1){
@@ -250,6 +251,7 @@ uberzahl montgomery_reduction(uberzahl T, long exponent, uberzahl M, uberzahl r)
 	uberzahl m, Minv, Mprime, t;
 	if(m_cache.find(M) == m_cache.end()){
 		Minv = M.inverse(r);
+		//Minv = square_and_multiply_exp(M, r-r/2-1, )
 		Mprime = r - Minv; //(negone*Minv) % r;
 
 
@@ -264,7 +266,8 @@ uberzahl montgomery_reduction(uberzahl T, long exponent, uberzahl M, uberzahl r)
 	if(t_m_cache.find({M,T}) == t_m_cache.end()){
 		//m = mod_by_div((T*Mprime), r);
 
-		m = (T*Mprime) % r;
+		//m = (T*Mprime) % r;
+		m = (T*Mprime) & (r-1);
 		// while(m > r){
 		// 	m = m >> exponent;
 		// }
