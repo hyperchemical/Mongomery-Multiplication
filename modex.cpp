@@ -51,7 +51,7 @@ class Timer{
 			ms = std::chrono::duration_cast<milliseconds>(t1 - t0);
 		}
 
-		uberzahl diff(){
+		long diff(){
 			return ms.count();
 		}
 	private:
@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
 	Timer timer;
 	//Types of exponentiation
 	vector<string> function_names = {"S&M", "S&M w/ Mont","CRT", "CRT w/ Mont"};
+	vector<double> total_times(function_names.size());
 	vector<bool> active(function_names.size()+1, true);
 	vector<uberzahl (*)(uberzahl, uberzahl, uberzahl, uberzahl)> functions
 		= {square_and_multiply_exp, square_and_multiply_montgomery_exp, chinese_remainder_exp,
@@ -115,7 +116,9 @@ int main(int argc, char *argv[])
 	int line_width = 15;
 	cout << left;
 
-	for(int i = 0; i < 10; i++){
+	int num_times_executed = 10;
+
+	for(int i = 0; i < num_times_executed; i++){
 		x = x.random(base_size);
 		c = c.random(exponent_size);
 		//Run algorithms for all pairs of sizes
@@ -167,15 +170,21 @@ int main(int argc, char *argv[])
 				timer.begin();
 				values.push_back(functions[i](x,c,a,b));
 				timer.end();
-				ms = std::chrono::duration_cast<milliseconds>(t1 - t0); //timing
+				long time_diff = timer.diff();
+				total_times[i] += time_diff;
 				cout << "Result: " << values.back() << endl;
-				cout << setw(line_width) << function_names[i] << "|" << timer.diff() << "ms\n";
+				cout << setw(line_width) << function_names[i] << "|" << time_diff << "ms\n";
 			}
 
 			//Verification of correctness
 			assert_all_equal(values);
 			cout << endl;
 		}
+	}
+
+	cout << endl;
+	for(int i = 0; i < functions.size(); i++){
+		cout << function_names[i] << ": " << total_times[i]/num_times_executed << " ms\n";
 	}
 }
 
