@@ -82,8 +82,8 @@ void assert_all_equal(vector<uberzahl>& vec);
 
 int main(int argc, char *argv[])
 {
-	long base_size = 100;
-	long exponent_size = 100; 
+	long base_size = 16;
+	long exponent_size = 64; 
 	vector<uberzahl> primes = { "8011", "8237",
 								"102539", "102547",
 								"15486907", "15487309",
@@ -116,11 +116,10 @@ int main(int argc, char *argv[])
 	int line_width = 15;
 	cout << left;
 
-	int num_times_executed = 10;
-
+	int num_times_executed = 1000;
+	c = c.random(exponent_size);
 	for(int i = 0; i < num_times_executed; i++){
 		x = x.random(base_size);
-		c = c.random(exponent_size);
 		//Run algorithms for all pairs of sizes
 		for(int k = 0; k < 1; k+=2){
 			vector<uberzahl> values;
@@ -137,18 +136,18 @@ int main(int argc, char *argv[])
 			b = b % ((a-1)*(b-1));
 			timer.end();
 
-			cout << "x: " << x << endl;
-			cout << "c: " << c << endl;
-			cout << "a: " << a << endl;
-			cout << "b: " << b << endl;
+			// cout << "x: " << x << endl;
+			// cout << "c: " << c << endl;
+			// cout << "a: " << a << endl;
+			// cout << "b: " << b << endl;
 
 			//Table output
-			cout << setw(line_width) << "Info" << "|Results\n";
-			cout << setfill('-') << setw(line_width) << "-" <<  "|" << setw(line_width) << "-" << endl;
-			cout << setfill(' ');
-			cout << setw(line_width) << "Base size" << "|" << base_size << " bits" << endl;
-			cout << setw(line_width) << "Exponent size"  << "|" << exponent_size << " bits" << endl;
-			cout << setw(line_width) << "Prime size" << "|" << primes[k].bitLength() << " bits" << endl;
+			// cout << setw(line_width) << "Info" << "|Results\n";
+			// cout << setfill('-') << setw(line_width) << "-" <<  "|" << setw(line_width) << "-" << endl;
+			// cout << setfill(' ');
+			// cout << setw(line_width) << "Base size" << "|" << base_size << " bits" << endl;
+			// cout << setw(line_width) << "Exponent size"  << "|" << exponent_size << " bits" << endl;
+			// cout << setw(line_width) << "Prime size" << "|" << primes[k].bitLength() << " bits" << endl;
 			//cout << setw(line_width) << "Generate Nums" << "|" << timer.diff() << "ms\n";
 
 			if(active[0]){
@@ -172,13 +171,13 @@ int main(int argc, char *argv[])
 				timer.end();
 				long time_diff = timer.diff();
 				total_times[i] += time_diff;
-				cout << "Result: " << values.back() << endl;
-				cout << setw(line_width) << function_names[i] << "|" << time_diff << "ms\n";
+				//cout << "Result: " << values.back() << endl;
+				//cout << setw(line_width) << function_names[i] << "|" << time_diff << "ms\n";
 			}
 
 			//Verification of correctness
 			assert_all_equal(values);
-			cout << endl;
+			//cout << endl;
 		}
 	}
 
