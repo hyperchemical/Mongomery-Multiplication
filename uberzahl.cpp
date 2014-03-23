@@ -29,8 +29,8 @@ uberzahl::uberzahl ( const char* number ){
   string_value = number;
   convert_to_numeric();
 }
-
-/*uberzahl::uberzahl(const mpz_class& number){
+/*
+uberzahl::uberzahl(const mpz_class& number){
 	mpz_class scale = mask+1;
 	mpz_class current = number;
 	while(current>0) {
@@ -58,9 +58,11 @@ const uberzahl& uberzahl::operator = ( const uberzahl& number )
   for ( size_t i=0; i < number.value_vector.size(); ++i )
     value_vector.push_back( number.value_vector[i] );
   clean_bits();
+  return *this;
 }
 
 void uberzahl::clean_bits ( void ){
+  // remove leading 0's
   while ( value_vector.size() > 1 && !value_vector.back() )
     value_vector.pop_back();
 }
@@ -68,7 +70,8 @@ void uberzahl::clean_bits ( void ){
 
 uberzahl uberzahl::operator << ( smallType shift ) const
 {
-  uberzahl retval = "0";
+  // binary left shift
+  uberzahl retval;
   retval.value_vector.pop_back();
   smallType largeshift = shift / maxBits;
   smallType smallshift = shift % maxBits;
@@ -90,7 +93,8 @@ uberzahl uberzahl::operator << ( smallType shift ) const
 
 uberzahl uberzahl::operator >> ( smallType shift ) const
 {
-  uberzahl retval = "0";
+  // binary right shift
+  uberzahl retval;
   smallType largeshift = shift / maxBits;
   smallType smallshift = shift % maxBits;
   for ( int i=0; i < (int)value_vector.size() - (int)largeshift - 1; ++i )
@@ -166,11 +170,9 @@ uberzahl uberzahl::operator - ( const uberzahl& input ) const
   return retval;
 }
 
-uberzahl uberzahl::operator * ( const uberzahl& input ) const
+uberzahl uberzahl::operator * ( const uberzahl& y ) const
 {
-  uberzahl x = *this;
-  uberzahl y = input;
-  size_t n = x.value_vector.size() - 1;
+  size_t n = value_vector.size() - 1;
   size_t t = y.value_vector.size() - 1;
   uberzahl retval = "0";
   retval.value_vector.clear();
@@ -178,15 +180,12 @@ uberzahl uberzahl::operator * ( const uberzahl& input ) const
   smallType carry = 0;
   largeType workbench = 0;
 
-  // this assumes your uberzahls dont use up your entire hard
-  // drive of space to store a number... I feel it is a fair
-  // assumption.
   for ( size_t i = 0; i <= n + t + 1; ++i )
     retval.value_vector.push_back(0);
   for ( size_t i = 0; i <= t; ++i ){
     carry = 0;
     for ( size_t j = 0; j <= n; ++ j ){
-      workbench = retval.value_vector[i+j] + ((largeType) x.value_vector[j])*y.value_vector[i] + carry;
+      workbench = retval.value_vector[i+j] + ((largeType) value_vector[j])*y.value_vector[i] + carry;
       retval.value_vector[i+j] = workbench & ((1ULL<<maxBits)-1);
       carry = workbench >> maxBits;
     }
@@ -198,27 +197,23 @@ uberzahl uberzahl::operator * ( const uberzahl& input ) const
 
 uberzahl uberzahl::operator / ( const uberzahl& number ) const
 {
-//	std::cout << "division of " << *this << " and " << number << std::endl;
-//*
 	uberzahl x = *this;
 	uberzahl y = number;
 	uberzahl q = 0ULL;
 	assert( y != "0" ); // y can not be 0 in our division algorithm
 	if ( x < y ) return q; // return 0 since y > x
-	x.clean_bits();y.clean_bits();
+	x.clean_bits();
+  y.clean_bits();
 	size_t n = x.value_vector.size() - 1;
 	size_t t = y.value_vector.size() - 1;
 
-	// step 1 -- initialize q to the correct size
+	// initialize q to the correct size
 	for ( size_t i = 0; i < n - t; ++i )
 		q.value_vector.push_back(0);
 	y = y << (maxBits*(n-t+1));
 	for(int i=0;i<maxBits*(n-t+1);i++) {
 		y = y>>1;
 		q = q<<1;
-//		std::cout << x << y << q << std::endl;
-//		int asdf;
-//		std::cin >> asdf;
 		if(x>=y) {
 			x = x-y;
 			q = q+1;
@@ -443,6 +438,7 @@ bool uberzahl::operator == ( const uberzahl& rhs ) const
 	return rhstemp == 0;
 }*/
 
+
 bool uberzahl::operator != ( const uberzahl& rhs ) const
 {
   return !( *this == rhs );
@@ -525,6 +521,7 @@ uberzahl uberzahl::random ( mediumType bits ){
 
 uberzahl uberzahl::inverse ( const uberzahl& b) const
 {
+  // computes (*this)^(-1) mod b
   if(*this=="1")
     return "1";
   std::pair<std::pair<uberzahl,uberzahl>,bool> inv = inverse(*this,b);
@@ -535,8 +532,20 @@ uberzahl uberzahl::inverse ( const uberzahl& b) const
     return inv.first.first;
 }
 
+uberzahl uberzahl::gcd( const uberzahl& that ) const
+{
+  // computes gcd(*this, that)
+  if ( *this < that )
+    return that.gcd( *this );
+  else if( that == "0" )
+    return *this;
+  else 
+    return that.gcd( *this % that );
+}
+
 std::pair<std::pair<uberzahl,uberzahl>,bool> uberzahl::inverse ( const uberzahl& a, const uberzahl& b) const
 {
+  // helper function for inverse
   uberzahl nexta = b%a, coeff = b/a;
   if(nexta == "0")
     return std::make_pair(std::make_pair("0","0"),true);
@@ -548,6 +557,7 @@ std::pair<std::pair<uberzahl,uberzahl>,bool> uberzahl::inverse ( const uberzahl&
 
 smallType uberzahl::bit ( mediumType n ) const
 {
+  // returns the nth bit (0 indexed)
   mediumType largeBit = n / maxBits;
   smallType smallBit = n % maxBits;
 
@@ -560,12 +570,12 @@ smallType uberzahl::bit ( mediumType n ) const
 
 smallType uberzahl::bitLength ( void ) const
 {
+  // returns the bit length (size) of a uberzahl
   for(int i=value_vector.size()-1;i>=0;i--) {
     if(value_vector[i]!=0) {
       largeType k=1;
       int j=0;
       while(k<=value_vector[i]) {
-        //		std::cout << j << " " << k << std::endl;
         k = k<<1;
         j++;
       }
@@ -573,4 +583,91 @@ smallType uberzahl::bitLength ( void ) const
     }
   }
   return 0;
+}
+
+uberzahl uberzahl::exp ( const uberzahl& exponent ) const
+{
+  if ( exponent == "0" ) // exponent of 0
+    return 1;
+  else if ( exponent == "1" ) // exponent of 1
+    return *this;
+
+  if ( (exponent&1) == "1" ) // odd exponent
+    return (this->exp(exponent^1)) * (*this);
+  else {
+    uberzahl tmp = this->exp(exponent >> 1);
+    return tmp * tmp;
+  }
+}
+
+// this is the recursive version, you need to implement the
+// iterative version in your code!
+uberzahl uberzahl::expm( const uberzahl& n, const uberzahl& mod ) const
+{
+  if ( n == "0" )
+    return 1;
+  else if ( n == "1" )
+    return ( *this % mod );
+  
+  if ( (n&1) == "1" )
+    return ( (this->expm(n^1, mod)) * (*this) ) % mod;
+  else {
+    uberzahl tmp = this->expm(n>>1, mod);
+    return (tmp * tmp) % mod;
+  }
+}
+
+uberzahl random ( const uberzahl& a, const uberzahl& b )
+{
+  if ( a > b ) return random( b, a );
+
+  uberzahl retval;
+  retval.random( b.bitLength() + 1 );
+  retval = (retval % ( b-a )) + a;
+  return retval;
+}
+
+bool rabinmiller ( const uberzahl& n, unsigned int k ){
+  // take care of corner cases 1,2,3 and even
+  if ( n < 2 ) return false;
+  else if ( n < 4 ) return true;
+  else if ( (n&1) == "0" ) return false;
+
+  uberzahl d = (n - 1) >> 1;
+  unsigned int s = 1;
+  while ( (d&1) == "0" ){
+    d = d >> 1;
+    s = s + 1;
+  }
+
+  // witness loop
+  uberzahl a;
+  uberzahl x;
+  for ( unsigned int i = 0; i < k; ++i ){
+    a = random( 2, n-2 );
+    x = a.expm(d,n);
+
+    if ( x == "1" || x == n-1 ) continue;
+
+    for ( unsigned int j = 0; j < s - 1; ++j ){
+      x = x.expm(2,n);
+      if ( x == "1" ) return false; // composite
+      if ( x == n-1 ) break;
+    }
+
+    if ( x == n-1 ) continue;
+    
+    return false; // composite
+  }
+
+  return true; // probably prime
+}
+
+uberzahl nextprime ( const uberzahl& n, unsigned int accuracy = 50){
+  // checks every odd number greater or equal to n for primality
+  uberzahl retval = n;
+  if ( (retval&1) == "0" ) retval = retval + 1;
+  while ( !rabinmiller(retval, accuracy) )
+    retval = retval + 2;
+  return retval;
 }

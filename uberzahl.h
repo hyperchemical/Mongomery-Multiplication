@@ -29,6 +29,8 @@ class uberzahl {
     uberzahl operator / ( smallType ) const;
     uberzahl operator % ( const uberzahl& ) const;
     smallType operator % ( smallType ) const;
+    uberzahl exp ( const uberzahl& ) const;
+    uberzahl expm( const uberzahl&, const uberzahl& ) const;
 
     // comparators
     bool operator > ( const uberzahl& ) const;
@@ -63,6 +65,8 @@ class uberzahl {
     std::pair<std::pair<uberzahl,uberzahl>,bool> inverse ( const uberzahl&, const uberzahl& ) const;
 };
 
-
+uberzahl random ( const uberzahl&, const uberzahl& );
+bool rabinmiller ( const uberzahl&, unsigned int );
+uberzahl nextprime ( const uberzahl&, unsigned int );
 
 #endif

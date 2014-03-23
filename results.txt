@@ -1,0 +1,69 @@
+Average Times with 10 trials:
+N size: 16
+S&M: 0.8 ms
+S&M w/ Mont: 0 ms
+CRT: 0.7 ms
+CRT w/ Mont: 0 ms
+
+Average Times with 10 trials:
+N size: 32
+S&M: 3.4 ms
+S&M w/ Mont: 0 ms
+CRT: 2.5 ms
+CRT w/ Mont: 0.1 ms
+
+Average Times with 10 trials:
+N size: 48
+S&M: 7.5 ms
+S&M w/ Mont: 0.1 ms
+CRT: 6.6 ms
+CRT w/ Mont: 0.2 ms
+
+Average Times with 10 trials:
+N size: 64
+S&M: 15.1 ms
+S&M w/ Mont: 0.2 ms
+CRT: 12.4 ms
+CRT w/ Mont: 0.4 ms
+
+Average Times with 10 trials:
+N size: 80
+S&M: 25.3 ms
+S&M w/ Mont: 0.4 ms
+CRT: 20.2 ms
+CRT w/ Mont: 0.6 ms
+
+Average Times with 10 trials:
+N size: 96
+S&M: 39.8 ms
+S&M w/ Mont: 0.6 ms
+CRT: 30.1 ms
+CRT w/ Mont: 1.5 ms
+
+Average Times with 10 trials:
+N size: 112
+S&M: 58 ms
+S&M w/ Mont: 1.7 ms
+CRT: 43.8 ms
+CRT w/ Mont: 2.7 ms
+
+Average Times with 10 trials:
+N size: 128
+S&M: 82.6 ms
+S&M w/ Mont: 2.9 ms
+CRT: 60 ms
+CRT w/ Mont: 4 ms
+
+Average Times with 10 trials:
+N size: 256
+S&M: 177.3 ms
+S&M w/ Mont: 6.3 ms
+CRT: 113 ms
+CRT w/ Mont: 7.5 ms
+
+Average Times with 10 trials:
+N size: 512
+S&M: 613.3 ms
+S&M w/ Mont: 14.9 ms
+CRT: 299.6 ms
+CRT w/ Mont: 14.9 ms

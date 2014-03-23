@@ -36,6 +36,7 @@ using namespace std;
 typedef std::chrono::high_resolution_clock Clock;
 typedef std::chrono::milliseconds milliseconds;
 
+//Timer Infrastructure
 class Timer{
 	public: 
 		Timer(){
@@ -64,6 +65,8 @@ class Timer{
 map<pair<uberzahl,uberzahl>, uberzahl> t_m_cache;
 //Takes in M, returns Minv and M' 
 map<uberzahl, pair<uberzahl, uberzahl>> m_cache;
+//t cache for b^-1 mod a
+map<pair<uberzahl, uberzahl>, uberzahl> binv_cache;
 
 //Generates a b bit prime number
 //uberzahl generate_prime(long b, gmp_randstate_t& rand_state);
@@ -76,22 +79,17 @@ uberzahl montgomery_reduction(uberzahl T, long exponent, uberzahl r,  uberzahl M
 uberzahl square_and_multiply_montgomery_exp(uberzahl x, uberzahl c, uberzahl a, uberzahl b);
 void assert_all_equal(vector<uberzahl>& vec);
 
-// uberzahl chinese_remainder_exp_sm(uberzahl x, uberzahl c,
-// 	uberzahl a, uberzahl b);
-
 
 int main(int argc, char *argv[])
 {
-	long base_size = 16;
-	long exponent_size = 64; 
-	vector<uberzahl> primes = { "8011", "8237",
-								"102539", "102547",
-								"15486907", "15487309",
-								"32416187899", "32416188499"
-								};
+	long base_size = 128;
+	long exponent_size = 128; 
+	long n_size = 256;
+	int num_times_same_n = 10;
 
 	Timer timer;
 	//Types of exponentiation
+	vector<long> n_sizes = {16, 32, 48, 64, 80, 96, 112, 128, 256};
 	vector<string> function_names = {"S&M", "S&M w/ Mont","CRT", "CRT w/ Mont"};
 	vector<double> total_times(function_names.size());
 	vector<bool> active(function_names.size()+1, true);
@@ -111,58 +109,29 @@ int main(int argc, char *argv[])
 	Clock::time_point t1;
 	milliseconds ms;
 
-	//t0 = Clock::now();
 	uberzahl x, c, n, a, b, result;
 	int line_width = 15;
 	cout << left;
 
-	int num_times_executed = 1000;
-	c = c.random(exponent_size);
-	for(int i = 0; i < num_times_executed; i++){
-		x = x.random(base_size);
-		//Run algorithms for all pairs of sizes
-		for(int k = 0; k < 1; k+=2){
+	for(int j = 0; j < n_sizes.size(); j++){
+		t_m_cache.clear();
+		m_cache.clear();
+		binv_cache.clear();
+		for(auto i : total_times){
+			i = 0;
+		}
+
+		a = a.random(n_sizes[j]/2);
+		a = nextprime(a, 50);
+		b = b.random(n_sizes[j]/2);
+		b = nextprime(b, 50);
+		n = a*b;
+
+		for(int i = 0; i < num_times_same_n; i++){
+			x = x.random(base_size);
+			c = c.random(n_sizes[j]);
+
 			vector<uberzahl> values;
-
-			//long prime_size = prime_sizes[j];
-			//Generate random x, c, a, b
-
-			timer.begin();
-
-			a = primes[k];
-			b = primes[k+1];
-			n = a*b;
-
-			b = b % ((a-1)*(b-1));
-			timer.end();
-
-			// cout << "x: " << x << endl;
-			// cout << "c: " << c << endl;
-			// cout << "a: " << a << endl;
-			// cout << "b: " << b << endl;
-
-			//Table output
-			// cout << setw(line_width) << "Info" << "|Results\n";
-			// cout << setfill('-') << setw(line_width) << "-" <<  "|" << setw(line_width) << "-" << endl;
-			// cout << setfill(' ');
-			// cout << setw(line_width) << "Base size" << "|" << base_size << " bits" << endl;
-			// cout << setw(line_width) << "Exponent size"  << "|" << exponent_size << " bits" << endl;
-			// cout << setw(line_width) << "Prime size" << "|" << primes[k].bitLength() << " bits" << endl;
-			//cout << setw(line_width) << "Generate Nums" << "|" << timer.diff() << "ms\n";
-
-			if(active[0]){
-				// //Generate correct answer
-				// timer.begin();
-				// uberzahl x3 = x;
-				// for(uberzahl i = 1; i < c; i = i + 1){
-				// 	x3 = (x3 * x3) % n;
-				// }
-				// cout << x3 << endl;
-				// //mpz_powm(result, x, c, n);
-				// timer.end();
-				// values.push_back(x3);
-				// cout << setw(line_width) << "mpz_powm" << "|" << timer.diff() << "ms\n";
-			}
 
 			for(int i = 0; i < functions.size(); i++){
 				if(!active[i+1]) continue;
@@ -171,21 +140,21 @@ int main(int argc, char *argv[])
 				timer.end();
 				long time_diff = timer.diff();
 				total_times[i] += time_diff;
-				//cout << "Result: " << values.back() << endl;
-				//cout << setw(line_width) << function_names[i] << "|" << time_diff << "ms\n";
 			}
 
 			//Verification of correctness
-			assert_all_equal(values);
-			//cout << endl;
-		}
-	}
 
-	cout << "Average Times:\n";
-	for(int i = 0; i < functions.size(); i++){
-		cout << function_names[i] << ": " << total_times[i]/num_times_executed << " ms\n";
+		}
+
+		cout << "Average Times with " << num_times_same_n << " trials:\n";
+		cout << "N size: " << n_sizes[j] << endl;
+		for(int i = 0; i < functions.size(); i++){
+			cout << function_names[i] << ": " << total_times[i]/num_times_same_n << " ms\n";
+		}
+		cout << endl;
 	}
 }
+
 
 uberzahl square_and_multiply_exp(uberzahl x, uberzahl c, 
 	uberzahl a, uberzahl b){
@@ -233,17 +202,20 @@ uberzahl montgomery_crt_exp(uberzahl x, uberzahl c, uberzahl a, uberzahl b){
 	uberzahl n, r, rinv, one;
 	one = 1;
 	n = a*b;
-	r = 2;
-	long exponent = 1;
-	for(;r < a; exponent++){
-		r = r*2;
-	}
+
 
 	uberzahl dp, dq, t, m1, m2, u;
 	dp = c % (a-1);
 	dq = c % (b-1);
 	//Invert b
-	t = b.inverse(a);
+	if(binv_cache.find({b,a}) == binv_cache.end())
+	{
+		t = b.inverse(a);
+		binv_cache[{b,a}] = t;
+	} else {
+		t = binv_cache[{b,a}];
+	}
+
 	m1 = square_and_multiply_montgomery_exp(x, dp, a, one); //% a;
 	m2 = square_and_multiply_montgomery_exp(x, dq, b, one); //% a;
 
@@ -259,8 +231,7 @@ uberzahl montgomery_reduction(uberzahl T, long exponent, uberzahl M, uberzahl r)
 	uberzahl m, Minv, Mprime, t;
 	if(m_cache.find(M) == m_cache.end()){
 		Minv = M.inverse(r);
-		//Minv = square_and_multiply_exp(M, r-r/2-1, )
-		Mprime = r - Minv; //(negone*Minv) % r;
+		Mprime = r - Minv; 
 
 
 		m_cache[M] = {Minv, Mprime};
@@ -272,22 +243,18 @@ uberzahl montgomery_reduction(uberzahl T, long exponent, uberzahl M, uberzahl r)
 
 	//Not cached
 	if(t_m_cache.find({M,T}) == t_m_cache.end()){
-		//m = mod_by_div((T*Mprime), r);
 
-		//m = (T*Mprime) % r;
 		m = (T*Mprime) & (r-1);
-		// while(m > r){
-		// 	m = m >> exponent;
-		// }
-		//Right shifts instead of mod
-		//mpz_fdiv_r_2exp(m, m, exponent);
+
 		t_m_cache[{M,T}] = m;
 	}
 	else { //Cached
 		m = t_m_cache[{M,T}];
 	}
 	
-	t = (T+m*M)/r;
+	//t = (T+m*M)/r;
+	t = (T+m*M);
+	t = t >> (exponent); 
 	return t >= M ? t - M : t;
 }
 
@@ -302,20 +269,20 @@ uberzahl square_and_multiply_montgomery_exp(uberzahl x, uberzahl c, uberzahl a, 
 		r = r*2;
 	}
 
+
 	//rinv = mod_by_div(square_and_multiply_exp(r, (a-1)*(b-1)-1, a, b), n);
-	rinv = r.inverse(n);
+	//rinv = r.inverse(n);
 	uberzahl z = 1;
 	z = (z*r) % n;
 	x = (x*r) % n;
 	unsigned int length = c.bitLength() - 1; //bit_length(c);
 	while(1){
-		//z = (z*z*rinv) % n;
-		z = z * z;
-		z = montgomery_reduction(z, exponent, n, r);
+		// z = z * z;
+		z = montgomery_reduction(z*z, exponent, n, r);
 		if(c.bit(length) == 1)
 		{
-			z = z * x;
-			z = montgomery_reduction(z, exponent, n, r);
+			//z = z * x;
+			z = montgomery_reduction(z*x, exponent, n, r);
 		}
 		if(length == 0) break;
 		length = length - 1;
