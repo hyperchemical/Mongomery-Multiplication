@@ -1,8 +1,12 @@
-// +, -, *, /, >> (bit shift), &, |, ^ (bitwise and, or, and xor), <, <=, ==, !=, >=, >.
-
-// We will also provide an inverse function, so you are welcome to use gmp's inverse for now.
-
 /*
+EECS 475
+Team: Lord Helix
+Team #: 26
+
+Heyung Joo Oh (heyoh)
+Haoran Ning (hning)
+Michael Wang (milewa)
+
 #Compiler Settings
 PATH := /usr/um/gcc-4.7.0/bin:$(PATH)
 LD_LIBRARY_PATH := /usr/um/gcc-4.7.0./lib64
