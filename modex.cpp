@@ -83,7 +83,6 @@ void assert_all_equal(vector<uberzahl>& vec);
 int main(int argc, char *argv[])
 {
 	long base_size = 128;
-	long exponent_size = 128; 
 	long n_size = 256;
 	int num_times_same_n = 10;
 
@@ -143,6 +142,7 @@ int main(int argc, char *argv[])
 			}
 
 			//Verification of correctness
+			assert_all_equal(values);
 
 		}
 
@@ -186,9 +186,9 @@ uberzahl chinese_remainder_exp(uberzahl x, uberzahl c,
 	dq = c % (b-1);
 
 	t = b.inverse(a);
-	m1 = square_and_multiply_exp(x, dp, a, one);// % a;
-	m2 = square_and_multiply_exp(x, dq, b, one);// % a;
 
+	m1 = square_and_multiply_exp(x, dp, a, one);
+	m2 = square_and_multiply_exp(x, dq, b, one);
 
 	if(m2 > m1){
 		m1 = m1 + a;
@@ -216,8 +216,8 @@ uberzahl montgomery_crt_exp(uberzahl x, uberzahl c, uberzahl a, uberzahl b){
 		t = binv_cache[{b,a}];
 	}
 
-	m1 = square_and_multiply_montgomery_exp(x, dp, a, one); //% a;
-	m2 = square_and_multiply_montgomery_exp(x, dq, b, one); //% a;
+	m1 = square_and_multiply_montgomery_exp(x, dp, a, one); 
+	m2 = square_and_multiply_montgomery_exp(x, dq, b, one); 
 
 	if(m2 > m1){
 		m1 = m1 + a;
